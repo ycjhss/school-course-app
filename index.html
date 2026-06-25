@@ -34,7 +34,6 @@
   <script type="text/babel">
     const { useState, useEffect } = React;
 
-    // 🔴 [매우 중요] 배포하신 구글 앱스 스크립트의 웹 앱 URL을 아래 따옴표 안에 넣어주세요!
     const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyxe2u2YOYbclnNnXd_7B7mvDYk9yNta0s4wcCwNGSEKTKTpplWZYIVdw2BdFEwpX-l/exec";
 
     function SchoolCourseApp() {
@@ -51,12 +50,6 @@
       const [isBaeksongOnlyMode, setIsBaeksongOnlyMode] = useState(false);
 
       useEffect(() => {
-        if (GAS_WEB_APP_URL === "여기에_앱스스크립트_주소를_넣어주세요") {
-          alert("코드에서 GAS_WEB_APP_URL을 먼저 수정해주세요!");
-          setLoading(false);
-          return;
-        }
-
         fetch(GAS_WEB_APP_URL)
           .then(res => res.json())
           .then(data => {
