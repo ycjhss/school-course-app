@@ -1,178 +1,1173 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>고등학교 교육과정 편제 검색 시스템</title>
-  
-  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
-  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
-  
-  <script src="https://unpkg.com/@babel/standalone@7.23.6/babel.min.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>황부장 고입상담시스템 · 일산 동·서구 / 파주 고교 교육과정 비교</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=Noto+Serif+KR:wght@600;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#1A2B45;          /* 교무수첩 네이비 */
+  --ink-soft:#44546B;
+  --paper:#F4F6F9;
+  --panel:#FFFFFF;
+  --line:#DFE4EC;
+  --navy:#24456E;
+  --hl:#FFE07A;           /* 형광펜 */
+  --hl-deep:#F5C53A;
+  --hl-ink:#6B4E00;
+  --seo:#0E7C7B;          /* 일산서구 */
+  --dong:#3D5A80;         /* 일산동구 */
+  --paju:#5B8C5A;         /* 파주 운정 */
+  --red:#B5453C;          /* 인장 */
+  --radius:12px;
+  font-size:15px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  font-family:'Noto Sans KR','Apple SD Gothic Neo','Malgun Gothic',sans-serif;
+  background:var(--paper); color:var(--ink);
+  line-height:1.55; letter-spacing:-0.01em;
+}
+.app{display:flex; min-height:100vh}
 
-  <style>
-    body { font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif; background-color: #f8f9fa; margin: 0; padding: 20px; color: #333; }
-    .container { max-width: 1200px; margin: 0 auto; background: #fff; padding: 30px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
-    .header-bar { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #eee; padding-bottom: 15px; margin-bottom: 20px; flex-wrap: wrap; gap: 10px; }
-    input, select, button, textarea { font-family: inherit; }
-    button { padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; transition: all 0.2s; }
-    button:hover { filter: brightness(0.95); }
-    .btn-green { background-color: #28a745; color: white; }
-    .btn-gray { background-color: #6c757d; color: white; }
-    .btn-blue { background-color: #007bff; color: white; }
-    .card { border: 1px solid #e9ecef; border-radius: 8px; padding: 20px; margin-bottom: 20px; transition: box-shadow 0.2s; }
-    .card:hover { box-shadow: 0 4px 8px rgba(0,0,0,0.05); }
-    .tag { background-color: #e9ecef; padding: 4px 10px; border-radius: 20px; font-size: 13px; color: #495057; display: inline-block; margin: 2px; }
-    table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 14px; }
-    th, td { padding: 10px; border: 1px solid #dee2e6; text-align: left; }
-    th { background-color: #f8f9fa; }
-  </style>
+/* ───────── 좌측: 학교 선택 패널 ───────── */
+.sidebar{
+  width:286px; flex-shrink:0; background:var(--ink); color:#E8EDF5;
+  display:flex; flex-direction:column; position:sticky; top:0; height:100vh; overflow-y:auto;
+}
+.brand{padding:26px 22px 18px; border-bottom:1px solid rgba(255,255,255,.12); position:relative}
+.brand .eyebrow{font-size:.72rem; letter-spacing:.22em; color:#9FB3CE; font-weight:500; margin-bottom:6px}
+.brand h1{
+  font-family:'Noto Serif KR',serif; font-weight:900; font-size:1.42rem; line-height:1.3; color:#fff;
+}
+.brand h1 .sub{display:block; font-size:.82rem; font-weight:600; color:#C8D5E8; margin-top:4px; font-family:'Noto Sans KR',sans-serif}
+.seal{
+  position:absolute; right:18px; top:24px; width:44px; height:44px; border:2.5px solid var(--red);
+  border-radius:8px; color:var(--red); font-family:'Noto Serif KR',serif; font-weight:900;
+  display:flex; align-items:center; justify-content:center; font-size:1.15rem; transform:rotate(6deg);
+  opacity:.92; user-select:none;
+}
+.side-note{padding:12px 22px; font-size:.74rem; color:#8FA2BF; border-bottom:1px solid rgba(255,255,255,.12)}
+.region-group{padding:14px 14px 4px}
+.region-title{
+  display:flex; align-items:center; gap:8px; font-size:.78rem; font-weight:700; letter-spacing:.08em;
+  color:#AEC1DC; padding:0 8px 8px;
+}
+.region-title .dot{width:9px;height:9px;border-radius:50%}
+.school-btn{
+  display:flex; align-items:center; justify-content:space-between; width:100%;
+  background:transparent; border:0; color:#DCE5F1; text-align:left; cursor:pointer;
+  padding:9px 10px; border-radius:8px; font-size:.93rem; font-weight:500; gap:8px;
+  transition:background .15s;
+}
+.school-btn:hover{background:rgba(255,255,255,.08)}
+.school-btn:focus-visible{outline:2px solid var(--hl); outline-offset:2px}
+.school-btn.active{background:var(--hl); color:var(--hl-ink); font-weight:700}
+.school-btn .tag{
+  font-size:.66rem; font-weight:700; padding:2px 7px; border-radius:99px; white-space:nowrap;
+  background:rgba(255,255,255,.14); color:#C9D7EA;
+}
+.school-btn.active .tag{background:rgba(0,0,0,.14); color:var(--hl-ink)}
+.sidebar-footer{margin-top:auto; padding:16px 22px 22px; font-size:.7rem; color:#7E91AE; line-height:1.6}
+
+/* ───────── 우측: 본문 ───────── */
+.main{flex:1; min-width:0; display:flex; flex-direction:column}
+.school-header{
+  background:var(--panel); border-bottom:1px solid var(--line); padding:24px 32px 0;
+}
+.sh-top{display:flex; flex-wrap:wrap; align-items:baseline; gap:12px}
+.sh-top h2{font-family:'Noto Serif KR',serif; font-weight:900; font-size:1.7rem; color:var(--ink)}
+.badge{
+  font-size:.72rem; font-weight:700; padding:3px 10px; border-radius:99px; color:#fff; letter-spacing:.02em;
+}
+.badge.type{background:var(--navy)}
+.slogan{margin-top:6px; color:var(--ink-soft); font-size:.95rem}
+.slogan::before{content:"“"} .slogan::after{content:"”"}
+.meta-line{margin-top:8px; font-size:.82rem; color:#6B7A92; display:flex; gap:18px; flex-wrap:wrap}
+.tabs{display:flex; gap:4px; margin-top:18px}
+.tab-btn{
+  border:1px solid var(--line); border-bottom:none; background:#EDF0F5; color:var(--ink-soft);
+  padding:10px 20px; font-size:.92rem; font-weight:700; cursor:pointer;
+  border-radius:10px 10px 0 0; transition:background .15s;
+}
+.tab-btn:hover{background:#F5F7FA}
+.tab-btn:focus-visible{outline:2px solid var(--navy); outline-offset:-2px}
+.tab-btn.active{background:var(--paper); color:var(--ink); border-color:var(--line); position:relative; top:1px}
+.content{padding:26px 32px 60px; max-width:1080px}
+
+/* 카드 */
+.card{
+  background:var(--panel); border:1px solid var(--line); border-radius:var(--radius);
+  padding:20px 22px; margin-bottom:18px;
+}
+.card h3{
+  font-size:1.02rem; font-weight:800; margin-bottom:12px; display:flex; align-items:center; gap:8px;
+}
+.card h3 .bar{width:5px; height:18px; background:var(--hl-deep); border-radius:3px; display:inline-block}
+.note-text{font-size:.92rem; color:var(--ink-soft)}
+.note-text b{color:var(--ink)}
+
+/* 강점 계열 */
+.strength-row{display:flex; gap:10px; flex-wrap:wrap}
+.strength-chip{
+  background:#FFF6DC; border:1px solid #F0DCA0; color:var(--hl-ink);
+  border-radius:10px; padding:8px 14px; font-size:.88rem; font-weight:700;
+}
+.strength-chip small{display:block; font-weight:500; font-size:.72rem; color:#9A7B1E}
+
+/* 진학계열 칩 */
+.track-chips{display:flex; flex-wrap:wrap; gap:8px; margin-bottom:20px}
+.track-chip{
+  border:1.5px solid var(--line); background:var(--panel); color:var(--ink-soft);
+  padding:7px 14px; border-radius:99px; font-size:.88rem; font-weight:600; cursor:pointer;
+  transition:all .15s;
+}
+.track-chip:hover{border-color:var(--navy); color:var(--navy)}
+.track-chip:focus-visible{outline:2px solid var(--navy); outline-offset:2px}
+.track-chip.active{background:var(--ink); border-color:var(--ink); color:#fff}
+
+/* 선택군 카드 */
+.group-card{
+  background:var(--panel); border:1px solid var(--line); border-radius:var(--radius);
+  padding:14px 18px; margin-bottom:12px;
+}
+.group-head{display:flex; align-items:center; gap:10px; margin-bottom:10px; flex-wrap:wrap}
+.gy{font-weight:800; font-size:.92rem; color:var(--navy)}
+.gpick{
+  font-size:.72rem; font-weight:700; background:var(--navy); color:#fff;
+  padding:2px 9px; border-radius:99px;
+}
+.gmatch-count{font-size:.76rem; color:#8A6A00; font-weight:700; margin-left:auto}
+.subj-list{display:flex; flex-wrap:wrap; gap:6px}
+.subj{
+  font-size:.82rem; padding:4px 10px; border-radius:7px; background:#F0F2F6; color:#5C6B82;
+  border:1px solid transparent;
+}
+/* 시그니처: 형광펜 권장과목 */
+.subj.rec{
+  background:linear-gradient(104deg, transparent 2%, var(--hl) 6%, var(--hl) 94%, transparent 98%);
+  color:var(--hl-ink); font-weight:800; border-color:#EDD27E;
+  box-shadow:0 1px 0 rgba(180,140,20,.25);
+}
+.subj.rec::before{content:"✓ "; font-weight:900}
+.legend{font-size:.78rem; color:#76859C; margin:4px 0 16px}
+.legend .subj{font-size:.74rem}
+
+.caution{
+  background:#FDF3F1; border:1px solid #EFCFC9; border-radius:10px;
+  padding:10px 14px; font-size:.84rem; color:#7E3B33; margin-top:6px;
+}
+.tip{
+  background:#EFF6F4; border:1px solid #CDE4DD; border-radius:10px;
+  padding:10px 14px; font-size:.84rem; color:#2E5E51; margin-bottom:16px;
+}
+
+/* 비교분석 */
+.rank-row{
+  display:grid; grid-template-columns:34px 150px 1fr; gap:12px; align-items:center;
+  padding:10px 6px; border-bottom:1px dashed var(--line);
+}
+.rank-row:last-child{border-bottom:none}
+.rank-num{
+  font-family:'Noto Serif KR',serif; font-weight:900; font-size:1.05rem; color:#9AA8BC; text-align:center;
+}
+.rank-row.top .rank-num{color:var(--hl-deep)}
+.rank-name{font-weight:800; font-size:.93rem; display:flex; flex-direction:column; gap:2px}
+.rank-name .rg{font-size:.68rem; font-weight:600; color:#8593A8}
+.rank-bar-wrap{display:flex; flex-direction:column; gap:4px}
+.rank-bar{height:12px; border-radius:99px; background:#EDF0F5; overflow:hidden}
+.rank-bar i{display:block; height:100%; background:linear-gradient(90deg,#E9C95B,var(--hl-deep)); border-radius:99px}
+.rank-row.top .rank-bar i{background:linear-gradient(90deg,#F2CB4E,#E0960F)}
+.rank-reason{font-size:.76rem; color:#76859C}
+.rank-reason b{color:#8A6A00}
+
+.placeholder{
+  padding:60px 20px; text-align:center; color:#8593A8; font-size:.95rem;
+}
+.placeholder .big{font-family:'Noto Serif KR',serif; font-size:1.3rem; font-weight:900; color:#5C6B82; margin-bottom:8px}
+
+.disclaim{font-size:.74rem; color:#94A1B5; margin-top:26px; line-height:1.7}
+
+/* 반응형 */
+@media (max-width:920px){
+  .app{flex-direction:column}
+  .sidebar{width:100%; height:auto; position:static}
+  .sidebar .region-group{padding-bottom:8px}
+  .school-list-wrap{display:flex; overflow-x:auto; gap:4px; padding-bottom:6px}
+  .content,.school-header{padding-left:18px; padding-right:18px}
+  .rank-row{grid-template-columns:26px 110px 1fr}
+}
+@media (prefers-reduced-motion:reduce){
+  *{transition:none !important}
+}
+
+/* ───── 담기 트레이 ───── */
+.compare-tray{padding:0 14px; margin-bottom:6px}
+.compare-tray:empty{display:none}
+.tray-inner{background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.14); border-radius:10px; padding:10px 12px}
+.tray-title{font-size:.72rem; font-weight:700; letter-spacing:.06em; color:#AEC1DC; margin-bottom:8px; display:flex; justify-content:space-between}
+.tray-chip{display:flex; align-items:center; justify-content:space-between; gap:6px; background:rgba(255,224,122,.16); color:#FFE9A6; border-radius:7px; padding:5px 8px; font-size:.84rem; font-weight:600; margin-bottom:5px}
+.tray-chip button{background:none; border:0; color:#FFC9C2; cursor:pointer; font-size:1rem; line-height:1; padding:0 2px}
+.tray-chip button:hover{color:#fff}
+.tray-print{width:100%; margin-top:4px; background:var(--hl); color:var(--hl-ink); border:0; border-radius:8px; padding:9px; font-weight:800; font-size:.86rem; cursor:pointer}
+.tray-print:hover{background:var(--hl-deep)}
+.tray-print:disabled{opacity:.45; cursor:not-allowed}
+.school-btn .pick-add{font-size:.66rem; font-weight:800; padding:3px 8px; border-radius:99px; background:rgba(255,255,255,.12); color:#C9D7EA; border:0; cursor:pointer; white-space:nowrap}
+.school-btn .pick-add:hover{background:rgba(255,224,122,.25); color:#FFE9A6}
+.school-btn .pick-add.on{background:var(--hl); color:var(--hl-ink)}
+.school-btn.active .pick-add{background:rgba(0,0,0,.16); color:var(--hl-ink)}
+
+/* ───── 좌측 도구 버튼 ───── */
+.side-tools{padding:10px 18px 4px}
+.tool-btn{width:100%; background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.16); color:#DCE5F1; border-radius:9px; padding:10px; font-size:.84rem; font-weight:700; cursor:pointer; font-family:inherit}
+.tool-btn:hover{background:rgba(255,255,255,.15)}
+.tool-btn:focus-visible{outline:2px solid var(--hl); outline-offset:2px}
+.made-by{margin-top:12px; font-family:'Noto Serif KR',serif; font-weight:600; color:#C8A24A; letter-spacing:.04em; font-size:.78rem}
+.made-by::before{content:"✎ "}
+
+/* ───── 모달 ───── */
+.modal-overlay{position:fixed; inset:0; background:rgba(15,24,40,.62); display:flex; align-items:flex-start; justify-content:center; padding:36px 18px; z-index:50; overflow-y:auto}
+.modal-overlay[hidden]{display:none}
+.modal{background:var(--panel); border-radius:16px; width:min(720px,100%); box-shadow:0 24px 70px rgba(0,0,0,.4); color:var(--ink)}
+.modal-head{display:flex; align-items:center; justify-content:space-between; padding:18px 24px; border-bottom:1px solid var(--line)}
+.modal-head h3{font-family:'Noto Serif KR',serif; font-weight:900; font-size:1.2rem}
+.modal-x{background:none; border:0; font-size:1.6rem; line-height:1; color:#8593A8; cursor:pointer}
+.modal-x:hover{color:var(--ink)}
+.modal-body{padding:20px 24px 24px}
+.dm-help{font-size:.84rem; color:var(--ink-soft); background:#F1F5FA; border:1px solid var(--line); border-radius:10px; padding:12px 14px; margin-bottom:16px; line-height:1.6}
+.dm-row{display:flex; gap:10px; align-items:center; margin-bottom:14px; flex-wrap:wrap}
+.dm-row label{font-weight:700; font-size:.86rem}
+.dm-grid{display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px}
+.modal label{display:flex; flex-direction:column; gap:5px; font-size:.82rem; font-weight:700; color:var(--ink-soft)}
+.modal label.dm-block{margin-bottom:12px}
+.modal small{font-weight:500; color:#8593A8}
+.modal input,.modal select,.modal textarea{font-family:inherit; font-size:.88rem; padding:8px 10px; border:1px solid var(--line); border-radius:8px; color:var(--ink); background:#fff; font-weight:500}
+.modal textarea{resize:vertical; line-height:1.6; white-space:pre}
+.modal input:focus,.modal select:focus,.modal textarea:focus{outline:2px solid var(--navy); outline-offset:-1px; border-color:var(--navy)}
+.dm-actions{display:flex; justify-content:space-between; align-items:center; gap:10px; margin-top:8px; flex-wrap:wrap}
+.dm-actions-right{display:flex; gap:8px; flex-wrap:wrap}
+.tool-btn.sm{width:auto; padding:8px 14px; background:#EDF0F5; color:var(--ink); border:1px solid var(--line)}
+.tool-btn.sm:hover{background:#E1E7F0}
+.tool-btn.primary{width:auto; padding:8px 18px; background:var(--navy); color:#fff; border:0}
+.tool-btn.primary:hover{background:#1B3556}
+.tool-btn.danger{color:#B5453C; border-color:#E7C4BF; background:#FDF3F1}
+.tool-btn.danger:hover{background:#F8E4E0}
+.dm-note{margin-top:12px; font-size:.82rem; font-weight:700; min-height:1.2em}
+.dm-note.ok{color:#2E7D5B} .dm-note.err{color:#B5453C}
+
+/* ───── 인쇄 ───── */
+.print-area{display:none}
+.print-meta{display:flex; justify-content:space-between; align-items:flex-end; border-bottom:3px solid var(--ink); padding-bottom:8px; margin-bottom:14px}
+.print-meta h1{font-family:'Noto Serif KR',serif; font-size:1.5rem; color:var(--ink)}
+.print-meta .pm-sub{font-size:.8rem; color:#555}
+.print-school{break-inside:avoid; margin-bottom:18px; border:1px solid #bbb; border-radius:8px; padding:12px 14px}
+.print-school h2{font-family:'Noto Serif KR',serif; font-size:1.15rem; margin-bottom:2px}
+.print-school .ps-tags{font-size:.78rem; color:#444; margin:4px 0 8px}
+.print-school .ps-note{font-size:.82rem; margin-bottom:8px}
+.print-grid{width:100%; border-collapse:collapse; font-size:.74rem}
+.print-grid th,.print-grid td{border:1px solid #999; padding:4px 6px; text-align:left; vertical-align:top}
+.print-grid th{background:#eee; white-space:nowrap}
+.print-cmp{width:100%; border-collapse:collapse; font-size:.76rem; margin-bottom:16px; break-inside:avoid}
+.print-cmp th,.print-cmp td{border:1px solid #999; padding:5px 7px; text-align:center}
+.print-cmp th{background:#1A2B45; color:#fff}
+.print-cmp td.lead{text-align:left; font-weight:700}
+.print-foot{margin-top:10px; text-align:right; font-family:'Noto Serif KR',serif; color:#777; font-size:.8rem}
+
+@media print{
+  .sidebar,.school-header,.content,.modal-overlay{display:none !important}
+  .app{display:block}
+  .print-area{display:block !important; padding:0}
+  @page{margin:14mm}
+  body{background:#fff}
+}
+</style>
 </head>
 <body>
+<div class="app">
 
-  <div id="root"></div>
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="eyebrow">2026학년도 고입 상담</div>
+      <h1>황부장<br>고입상담시스템<span class="sub">일산 동·서구 / 파주 운정 20개교</span></h1>
+      <div class="seal" aria-hidden="true">黃</div>
+    </div>
+    <div class="side-note">학교 이름을 누르면 정보가 열립니다. <b style="color:#FFE07A">담기 ＋</b>로 최대 3개교를 골라 비교·인쇄할 수 있습니다.</div>
+    <div class="compare-tray" id="compareTray"></div>
+    <nav id="schoolNav" aria-label="학교 선택"></nav>
+    <div class="side-tools">
+      <button class="tool-btn" id="btnDataEditor">⚙ 학교 데이터 입력·업데이트</button>
+    </div>
+    <div class="sidebar-footer">
+      자료: 2026학년도 입학생 교육과정 편제표, 학교별 일반안내, 진로계열별 권장 선택과목 (2025~2026 기준)<br>
+      ※ 교육과정은 학교 사정에 따라 변경될 수 있습니다.
+      <div class="made-by">made by 저동고 황부장</div>
+    </div>
+  </aside>
 
-  <script type="text/babel" data-presets="react">
-    const { useState, useEffect } = React;
-    const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyxe2u2YOYbclnNnXd_7B7mvDYk9yNta0s4wcCwNGSEKTKTpplWZYIVdw2BdFEwpX-l/exec";
-
-    function SchoolCourseApp() {
-      const [schools, setSchools] = useState([]);
-      const [loading, setLoading] = useState(true);
-      const [errorMsg, setErrorMsg] = useState('');
-      
-      const [searchTerm, setSearchTerm] = useState('');
-      const [selectedRegion, setSelectedRegion] = useState('전체');
-      
-      const [isAdmin, setIsAdmin] = useState(false);
-      const [adminPassword, setAdminPassword] = useState('');
-      const [editingSchool, setEditingSchool] = useState(null);
-      const [isBaeksongOnlyMode, setIsBaeksongOnlyMode] = useState(false);
-
-      useEffect(() => {
-        fetch(GAS_WEB_APP_URL)
-          .then(res => {
-            if (!res.ok) throw new Error("서버 응답 오류");
-            return res.json();
-          })
-          .then(data => {
-            setSchools(data);
-            setLoading(false);
-          })
-          .catch(err => {
-            console.error(err);
-            setErrorMsg(err.toString());
-            setLoading(false);
-          });
-      }, []);
-
-      const handleAdminLogin = () => {
-        if (adminPassword.trim() === "") return alert("비밀번호를 입력하세요.");
-        setIsAdmin(true);
-        alert("관리자 모드가 활성화되었습니다.");
-      };
-
-      // 🚨 바벨 에러의 주범이었던 async/await 문법을 완전히 제거했습니다!
-      const handleSaveChanges = () => {
-        if (!editingSchool) return;
-
-        fetch(GAS_WEB_APP_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'text/plain' },
-          body: JSON.stringify({ password: adminPassword, data: editingSchool })
-        })
-        .then(response => response.json())
-        .then(result => {
-          if (result.success) {
-            alert("저장 성공!");
-            setSchools(schools.map(s => s.id === editingSchool.id ? editingSchool : s));
-            setEditingSchool(null);
-          } else {
-            alert("저장 실패: " + result.message);
-          }
-        })
-        .catch(error => {
-          alert("저장 중 에러가 발생했습니다.");
-        });
-      };
-
-      const filteredSchools = schools.filter(school => {
-        if (isBaeksongOnlyMode) return school.name === "백송고";
-        const matchesSearch = school.name.includes(searchTerm) || 
-                              (school.note && school.note.includes(searchTerm)) ||
-                              (school.tags && school.tags.some(tag => tag.includes(searchTerm)));
-        const matchesRegion = selectedRegion === '전체' || school.region === selectedRegion;
-        return matchesSearch && matchesRegion;
-      });
-
-      if (loading) return <div style={{textAlign: 'center', marginTop: '50px'}}>⏳ 데이터를 불러오는 중입니다...</div>;
-      if (errorMsg) return <div style={{textAlign: 'center', color: 'red'}}>🚨 에러: {errorMsg}</div>;
-
-      return (
-        <div className="container">
-          <header className="header-bar">
-            <h2 style={{margin: 0}}>🏫 고등학교 교육과정 편제 시스템</h2>
-            <div style={{ display: 'flex', gap: '10px' }}>
-              <button className={isBaeksongOnlyMode ? "btn-green" : "btn-gray"} onClick={() => setIsBaeksongOnlyMode(!isBaeksongOnlyMode)}>
-                {isBaeksongOnlyMode ? "전체 보기" : "🌲 백송고 모드"}
-              </button>
-              {!isAdmin ? (
-                <div style={{ display: 'flex', gap: '5px' }}>
-                  <input type="password" value={adminPassword} onChange={(e) => setAdminPassword(e.target.value)} style={{width: '80px'}} />
-                  <button onClick={handleAdminLogin}>인증</button>
-                </div>
-              ) : <span style={{ color: '#28a745' }}>🔓 관리자</span>}
-            </div>
-          </header>
-
-          {!isBaeksongOnlyMode && (
-            <div style={{ marginBottom: '20px', display: 'flex', gap: '10px' }}>
-              <select value={selectedRegion} onChange={(e) => setSelectedRegion(e.target.value)}>
-                <option value="전체">전체 지역</option><option value="서구">서구</option><option value="동구">동구</option><option value="파주">파주</option>
-              </select>
-              <input type="text" placeholder="검색어 입력..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} style={{flex: 1}} />
-            </div>
-          )}
-
-          <div>
-            {filteredSchools.map(school => (
-              <div key={school.id} className="card">
-                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <h3>{school.name} 고등학교</h3>
-                  {isAdmin && <button onClick={() => setEditingSchool({ ...school })}>✏️ 편집</button>}
-                </div>
-                
-                {editingSchool && editingSchool.id === school.id ? (
-                  <div style={{ background: '#f1f3f5', padding: '15px', marginTop: '10px' }}>
-                    <textarea value={editingSchool.note} onChange={(e) => setEditingSchool({ ...editingSchool, note: e.target.value })} style={{ width: '100%', height: '80px' }} />
-                    <button onClick={handleSaveChanges} className="btn-blue" style={{marginTop: '10px'}}>💾 저장</button>
-                  </div>
-                ) : (
-                  <p dangerouslySetInnerHTML={{ __html: school.note }}></p>
-                )}
-
-                <h4 style={{marginTop: '15px'}}>📋 편제 요약</h4>
-                <table>
-                  <thead><tr><th>학년/학기</th><th>방식</th><th>과목 리스트</th></tr></thead>
-                  <tbody>
-                    {school.groups && school.groups.map((group, gIdx) => (
-                      <tr key={gIdx}>
-                        <td>{group.g}학년 {group.s === 0 ? "공통" : `${group.s}학기`}</td>
-                        <td style={{ color: '#d9534f' }}>{group.pick}</td>
-                        <td>{group.subj ? group.subj.join(', ') : ''}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            ))}
+  <div class="modal-overlay" id="dataModal" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="dmTitle">
+      <div class="modal-head">
+        <h3 id="dmTitle">학교 데이터 입력 · 업데이트</h3>
+        <button class="modal-x" id="dmClose" aria-label="닫기">×</button>
+      </div>
+      <div class="modal-body">
+        <p class="dm-help">편제표가 바뀌면 아래에서 학교를 골라 내용을 고친 뒤 <b>이 세션에 적용</b>을 누르세요. 영구 보관하려면 <b>변경본(JSON) 내려받기</b>로 파일을 저장해 두었다가, 다음에 <b>파일 불러오기</b>로 올리면 됩니다.</p>
+        <div class="dm-row">
+          <label for="dmSchool">학교 선택</label>
+          <select id="dmSchool"></select>
+          <button class="tool-btn sm" id="dmNew">＋ 새 학교 추가</button>
+        </div>
+        <div class="dm-grid">
+          <label>학교 이름<input id="dmName" placeholder="예: 저동"></label>
+          <label>지역
+            <select id="dmRegion"><option value="서구">일산서구</option><option value="동구">일산동구</option><option value="파주">파주</option></select>
+          </label>
+          <label>유형<input id="dmType" placeholder="예: 일반 / 과학중점학교"></label>
+          <label>슬로건<input id="dmSlogan" placeholder="학교 교육목표 한 줄"></label>
+        </div>
+        <label class="dm-block">학교 특색 설명 <small>(굵게는 &lt;b&gt;…&lt;/b&gt; 사용 가능)</small>
+          <textarea id="dmNote" rows="3" placeholder="학교 특성화·중점 운영 내용"></textarea></label>
+        <label class="dm-block">특색 태그 <small>(쉼표로 구분)</small>
+          <input id="dmTags" placeholder="예: 과학중점, 과학과제 연구"></label>
+        <label class="dm-block">유의사항 <small>(없으면 비워두기)</small>
+          <input id="dmCaution" placeholder="예: 국·수·영 합계 81학점 상한"></label>
+        <label class="dm-block">선택군 편제 <small>(한 줄에 하나: <b>학년,학기,택N,과목/과목/과목</b> — 학기는 1·2, 통합편성은 0)</small>
+          <textarea id="dmGroups" rows="9" placeholder="2,1,택3,세계사/사회와 문화/물리학/화학&#10;2,2,택1,중국어/일본어&#10;3,1,택4,미적분II/전자기와 양자/화학 반응의 세계/생물의 유전"></textarea></label>
+        <div class="dm-actions">
+          <button class="tool-btn danger sm" id="dmDelete">학교 삭제</button>
+          <div class="dm-actions-right">
+            <button class="tool-btn sm" id="dmDownload">변경본(JSON) 내려받기</button>
+            <button class="tool-btn sm" id="dmUpload">파일 불러오기</button>
+            <input type="file" id="dmFile" accept="application/json,.json" hidden>
+            <button class="tool-btn primary" id="dmApply">이 세션에 적용</button>
+            <button class="tool-btn primary" id="dmSaveCloud" style="background:#0E7C7B;">☁️ 클라우드 저장</button>
           </div>
         </div>
-      );
-    }
+        <p class="dm-note" id="dmMsg"></p>
+      </div>
+    </div>
+  </div>
 
-    const root = ReactDOM.createRoot(document.getElementById('root'));
-    root.render(<SchoolCourseApp />);
-  </script>
+  <main class="main">
+    <div class="school-header" id="schoolHeader"></div>
+    <div class="content" id="content"></div>
+  </main>
+
+  <div class="print-area" id="printArea"></div>
+
+</div>
+<script>
+/* ───────────────── 진학계열 정의 (진로계열별 권장 선택과목 기반) ───────────────── */
+const TRACKS = [
+{id:'lang',name:'어학',note:'영어 심화·제2외국어가 핵심입니다. 같은 언어를 「기초 → 회화 → 문화 → 심화」로 3년 연계 이수하면 전공적합성이 가장 뚜렷해집니다.',
+ core:['심화영어','심화영어 독해와 작문','심화영어 독해 I','영미문학 읽기','영어 발표와 토론','미디어 영어','세계문화와 영어','언어생활 탐구','영어 독해와 작문','중국어','일본어','스페인어','중국어 회화','일본어 회화','스페인어 회화','심화 중국어','심화 일본어','심화 스페인어','세계문학과 영어'],
+ plus:['중국 문화','일본 문화','스페인어권 문화','한문','한문 고전 읽기','언어생활과 한자','주제 탐구 독서','독서토론과 글쓰기','문학과 영상','매체 의사소통','관광 일본어','관광 중국어']},
+{id:'human',name:'인문학',note:'역사·철학·윤리 탐구 과목이 핵심 평가 요소입니다. 독서 기반 과목(주제 탐구 독서 등)으로 깊이를 더하세요.',
+ core:['세계사','동아시아 역사 기행','윤리와 사상','인문학과 윤리','현대사회와 윤리','역사로 탐구하는 현대세계','문화로 보는 한국사','한국사 심화 탐구','윤리문제 탐구','한문 고전 읽기','한국 근현대사','인간과 철학','주제 탐구 독서'],
+ plus:['독서토론과 글쓰기','문학과 영상','논술','인간과 심리','세계시민과 지리','영미문학 읽기','언어생활과 한자','사회와 문화','매체 의사소통','논리와 사고','수학과 문화']},
+{id:'soc',name:'사회학',note:'사회·문화 현상 탐구 과목과 지리·윤리 과목을 폭넓게 조합하고, 3학년 「사회문제 탐구」류로 심화를 보여주세요.',
+ core:['사회와 문화','사회문제 탐구','세계시민과 지리','정치','현대사회와 윤리','도시의 미래 탐구','한국지리 탐구','기후변화와 지속가능한 세계','여행지리','윤리문제 탐구'],
+ plus:['법과 사회','경제','역사로 탐구하는 현대세계','세계사','확률과 통계','실용 통계','국제 관계의 이해','논술','동아시아 역사 기행','세계시민']},
+{id:'econ',name:'경제',note:'「경제」는 필수, 「경제 수학·금융과 경제생활」로 연계하세요. 수학(미적분·확률과 통계) 이수가 정량평가에 중요합니다.',
+ core:['경제','경제 수학','금융과 경제생활','정치','법과 사회','사회와 문화','국제 관계의 이해','인간과 경제활동','인간과 경제'],
+ plus:['미적분II','확률과 통계','실용 통계','데이터 과학','세계시민과 지리','사회문제 탐구','도시의 미래 탐구','지식 재산 일반','미적분I']},
+{id:'biz',name:'경영',note:'경제·통계 기반에 데이터·디지털 역량(데이터 과학, 소프트웨어와 생활)을 더하면 차별화됩니다.',
+ core:['경제','금융과 경제생활','경제 수학','사회와 문화','데이터 과학','지식 재산 일반','소프트웨어와 생활','실용 통계'],
+ plus:['정치','법과 사회','인공지능 기초','매체 의사소통','국제 관계의 이해','도시의 미래 탐구','인간과 경제활동','확률과 통계','미적분II','직무 수학']},
+{id:'intl',name:'국제',note:'「국제 관계의 이해」 개설 학교가 드뭅니다(세원·백석·저동·풍동·지산·일산대진). 영어 심화 + 지리·세계사 + 제2외국어 조합이 정석입니다.',
+ core:['국제 관계의 이해','세계시민과 지리','세계사','정치','세계문화와 영어','심화영어','영어 발표와 토론','동아시아 역사 기행','여행지리','심화영어 독해와 작문'],
+ plus:['중국어','일본어','스페인어','중국 문화','일본 문화','스페인어권 문화','경제','법과 사회','역사로 탐구하는 현대세계','미디어 영어','영미문학 읽기','세계시민']},
+{id:'admin',name:'행정',note:'법·정치·사회 탐구 과목을 중심으로, 「사회문제 탐구」·「논술」로 공적 문제 해결 역량을 보여주세요.',
+ core:['정치','법과 사회','사회와 문화','사회문제 탐구','윤리와 사상','경제','현대사회와 윤리'],
+ plus:['국제 관계의 이해','논술','윤리문제 탐구','도시의 미래 탐구','한국지리 탐구','확률과 통계','금융과 경제생활']},
+{id:'med',name:'의학',note:'화학·생명과학 → 「화학 반응의 세계」·「세포와 물질대사」·「생물의 유전」 3년 연계가 필수입니다. 수학은 미적분II·기하까지.',
+ core:['화학','생명과학','화학 반응의 세계','세포와 물질대사','생물의 유전','물질과 에너지','미적분I','미적분II','기하'],
+ plus:['물리학','확률과 통계','융합과학 탐구','인간과 심리','보건','생활과학 탐구','과학과제 연구','고급 생명과학','고급 화학','생명과학 실험','화학 실험','생태와 환경']},
+{id:'pharm',name:'약학',note:'화학 계열 심화(화학 반응의 세계, 물질과 에너지)가 핵심이며 생명과학 연계도 함께 가져갑니다.',
+ core:['화학','생명과학','화학 반응의 세계','물질과 에너지','세포와 물질대사','생물의 유전','미적분I','미적분II','기하'],
+ plus:['물리학','융합과학 탐구','고급 화학','화학 실험','생명과학 실험','과학과제 연구','확률과 통계']},
+{id:'nurse',name:'간호·보건',note:'생명과학 연계 + 사람 이해 과목(인간과 심리, 보건, 아동발달과 부모)을 조합하면 전공적합성이 살아납니다.',
+ core:['생명과학','화학','세포와 물질대사','생물의 유전','인간과 심리','보건','아동발달과 부모','생활과학 탐구'],
+ plus:['사회와 문화','화학 반응의 세계','현대사회와 윤리','확률과 통계','윤리문제 탐구']},
+{id:'eng',name:'공학',note:'물리학 → 「역학과 에너지」·「전자기와 양자」 연계 + 수학(기하·미적분II)이 골격입니다. 공학 설계·로봇 과목으로 실습 역량을 더하세요.',
+ core:['물리학','화학','역학과 에너지','전자기와 양자','물질과 에너지','화학 반응의 세계','기하','미적분II','창의공학 설계','로봇과 공학세계','인공지능 수학','수학과제 탐구','미적분I'],
+ plus:['정보','프로그래밍','인공지능 기초','융합과학 탐구','지구시스템과학','고급 물리학','고급 화학','물리학 실험','화학 실험','고급 미적분','전문 수학','고급 대수','과학과제 연구','데이터 과학','소프트웨어와 생활','정보과학','미래형 항공기체(AAV)','인공지능융합프로젝트']},
+{id:'cs',name:'컴퓨터·AI',note:'정보 → 프로그래밍/인공지능 기초 → 데이터 과학·소프트웨어와 생활로 이어지는 정보 교과 연계 + 수학 심화가 표준 루트입니다.',
+ core:['정보','프로그래밍','인공지능 기초','데이터 과학','소프트웨어와 생활','인공지능 수학','데이터 과학과 머신러닝','수리와 인공지능','정보과학','인공지능융합프로젝트','미적분I','미적분II','기하'],
+ plus:['확률과 통계','실용 통계','물리학','전자기와 양자','지식 재산 일반','창의공학 설계','로봇과 공학세계','수학과제 탐구','전문 수학','고급 대수','고급 미적분','인공지능기반 생물정보학 기초와 활용','인공지능 생활탐구']},
+{id:'nat',name:'자연과학',note:'과학 4과목 중 지망 분야 2~3개를 골라 Ⅰ→Ⅱ 수준(역학과 에너지, 세포와 물질대사 등)으로 끝까지 연계하는 것이 핵심입니다.',
+ core:['물리학','화학','생명과학','지구과학','역학과 에너지','전자기와 양자','물질과 에너지','화학 반응의 세계','세포와 물질대사','생물의 유전','지구시스템과학','행성우주과학','기하','미적분I','미적분II'],
+ plus:['융합과학 탐구','과학의 역사와 문화','수학과제 탐구','과학과제 연구','창의과학연구','과학창의연구','고급 물리학','고급 화학','고급 생명과학','고급 지구과학','물리학 실험','화학 실험','생명과학 실험','지구과학 실험','고급 미적분','전문 수학','기후변화와 환경생태','생태와 환경']},
+{id:'art',name:'예술',note:'「연주와 창작/창작」(실기) → 「감상과 비평」(이론) → 「미디어/매체」(융합)로 이어지는 예술 교과 연계를 확인하세요.',
+ core:['음악 연주와 창작','미술 창작','음악 감상과 비평','미술 감상과 비평','음악과 미디어','미술과 매체','음악','미술','미술매체 탐구'],
+ plus:['문학과 영상','매체 의사소통']},
+{id:'pe',name:'체육',note:'체육 진로·융합 과목과 「전공실기」 개설 여부가 관건입니다. 체대 입시는 실기 지도 프로그램도 함께 확인하세요.',
+ core:['운동과 건강','스포츠 과학','스포츠 생활','스포츠 생활1','스포츠 생활2','스포츠 문화','기초체육 전공실기','심화체육 전공실기'],
+ plus:['보건','생명과학','역학과 에너지','인간과 심리']},
+{id:'edu',name:'교육',note:'「교육의 이해」 개설 학교(일산대진·저동)가 드뭅니다. 심리·아동 과목과 지망 교과의 심화 과목을 함께 이수하세요.',
+ core:['교육의 이해','논술','인간과 심리','아동발달과 부모'],
+ plus:['윤리와 사상','사회와 문화','인문학과 윤리','인간과 철학','주제 탐구 독서','독서토론과 글쓰기','논리와 사고']}
+];
+
+/* ───────────────── 20개교 기본 내장 데이터 ───────────────── */
+const SCHOOLS = [
+{id:"gj", name:"가좌고", region:"서구", type:"일반(중점 프로그램)", slogan:"미래를 이끌어갈 도덕적이고 창의적인 인재육성", note:"<b>체육과(전 학급 골프 특강·체대 입시 지도)</b>, 중국어과(문화 연계 학습), 가정과학, 경제(NIE), 과학과(피지컬 컴퓨팅 메이커스) 중점 운영. 3학년에 <b>기초체육 전공실기</b>가 개설되어 체육 진로에 강점.", tags:["체육 중점 프로그램","중국어 특화","기초체육 전공실기"], groups:[
+  {g:2,s:1,pick:"택3",subj:["세계사","사회와 문화","세계시민과 지리","윤리와 사상","물리학","화학","생명과학","지구과학"]},
+  {g:2,s:1,pick:"택1",subj:["중국어","일본어"]},
+  {g:2,s:1,pick:"택1",subj:["생활과학 탐구","창의공학 설계"]},
+  {g:2,s:2,pick:"택3",subj:["현대사회와 윤리","동아시아 역사 기행","법과 사회","정치","한국지리 탐구","역학과 에너지","물질과 에너지","세포와 물질대사","지구시스템과학"]},
+  {g:2,s:2,pick:"택1",subj:["중국어 회화","일본어 회화"]},
+  {g:2,s:2,pick:"택1",subj:["기하","로봇과 공학세계","아동발달과 부모"]},
+  {g:3,s:1,pick:"택2",subj:["역사로 탐구하는 현대세계","윤리문제 탐구","사회문제 탐구","기후변화와 지속가능한 세계","경제","도시의 미래 탐구","전자기와 양자","화학 반응의 세계","생물의 유전","행성우주과학"]},
+  {g:3,s:1,pick:"택1",subj:["미적분II","미디어 영어","인공지능 기초","중국 문화","일본 문화","한문 고전 읽기"]},
+  {g:3,s:1,pick:"택1",subj:["음악 감상과 비평","미술 감상과 비평"]},
+  {g:3,s:2,pick:"택2",subj:["역사로 탐구하는 현대세계","윤리문제 탐구","사회문제 탐구","기후변화와 지속가능한 세계","과학의 역사와 문화","기후변화와 환경생태"]},
+  {g:3,s:2,pick:"택1",subj:["언어생활 탐구","세계문화와 영어","여행지리","융합과학 탐구","언어생활과 한자","기초체육 전공실기"]},
+  {g:3,s:2,pick:"택1",subj:["음악과 미디어","미술과 매체"]}]},
+
+{id:"dh", name:"대화고", region:"서구", type:"일반", slogan:"바른 인성을 바탕으로 큰 꿈을 갖고 미래를 향해 도전하는 창의 지성의 인간 육성", note:"2학년 1학기부터 사회·과학 탐구를 동시에 폭넓게 개방하고, 중국어·일본어·한문 3개 언어 트랙을 3년 연계(회화→문화→한자)로 운영. 3학년 선택폭(택2+택3)이 넓어 문·이과 어느 쪽이든 조합이 유연함.", tags:["언어 3트랙 연계","유연한 문이과 조합"], groups:[
+  {g:2,s:1,pick:"택1",subj:["중국어","일본어","한문"]},
+  {g:2,s:1,pick:"택3",subj:["주제 탐구 독서","영미문학 읽기","경제 수학","경제","세계사","도시의 미래 탐구","윤리와 사상","사회문제 탐구","물리학","화학","생명과학","지구과학"]},
+  {g:2,s:2,pick:"택1",subj:["중국어 회화","일본어 회화","한문 고전 읽기","기하"]},
+  {g:2,s:2,pick:"택3",subj:["언어생활 탐구","영어 발표와 토론","정치","법과 사회","동아시아 역사 기행","한국지리 탐구","현대사회와 윤리","사회문제 탐구","역학과 에너지","물질과 에너지","세포와 물질대사","지구시스템과학"]},
+  {g:3,s:1,pick:"택1",subj:["음악 감상과 비평","미술 감상과 비평","논술"]},
+  {g:3,s:1,pick:"택2",subj:["중국 문화","일본 문화","언어생활과 한자","지식 재산 일반","인공지능 기초","문학과 영상","심화영어","미적분II"]},
+  {g:3,s:1,pick:"택3",subj:["사회와 문화","인문학과 윤리","역사로 탐구하는 현대세계","세계시민과 지리","기후변화와 지속가능한 세계","전자기와 양자","화학 반응의 세계","생물의 유전","행성우주과학","기후변화와 환경생태"]},
+  {g:3,s:2,pick:"택1",subj:["음악과 미디어","미술과 매체","생태와 환경"]},
+  {g:3,s:2,pick:"택2",subj:["중국 문화","일본 문화","언어생활과 한자","아동발달과 부모","소프트웨어와 생활","독서토론과 글쓰기","세계문화와 영어","직무 수학"]},
+  {g:3,s:2,pick:"택3",subj:["금융과 경제생활","여행지리","역사로 탐구하는 현대세계","윤리문제 탐구","기후변화와 지속가능한 세계","융합과학 탐구","과학의 역사와 문화","기후변화와 환경생태"]}]},
+
+{id:"di", name:"덕이고", region:"서구", type:"일반", slogan:"지성, 감성, 인성을 갖춘 창의·융합인재 육성", note:"관내에서 드물게 <b>스페인어를 3년 연계(스페인어→회화→문화→심화)</b>로 개설. 일본어·중국어 포함 3개 외국어 트랙과 매 학기 기초(국·영·수) 선택군이 따로 있어 어학·인문 설계가 정교함.", tags:["스페인어 3년 연계","외국어 3트랙"], groups:[
+  {g:2,s:1,pick:"택1",subj:["독서토론과 글쓰기","기하","미디어 영어"]},
+  {g:2,s:1,pick:"택3",subj:["세계시민과 지리","세계사","정치","현대사회와 윤리","물리학","화학","생명과학","지구과학"]},
+  {g:2,s:1,pick:"택1",subj:["일본어","중국어","스페인어"]},
+  {g:2,s:2,pick:"택1",subj:["주제 탐구 독서","인공지능 수학","영미문학 읽기"]},
+  {g:2,s:2,pick:"택3",subj:["한국지리 탐구","동아시아 역사 기행","법과 사회","윤리와 사상","역학과 에너지","물질과 에너지","세포와 물질대사","지구시스템과학"]},
+  {g:2,s:2,pick:"택1",subj:["일본어 회화","중국어 회화","스페인어 회화"]},
+  {g:3,s:1,pick:"택1",subj:["매체 의사소통","미적분II","세계문화와 영어"]},
+  {g:3,s:1,pick:"택1",subj:["미술 창작","음악 연주와 창작"]},
+  {g:3,s:1,pick:"택3",subj:["도시의 미래 탐구","역사로 탐구하는 현대세계","윤리문제 탐구","사회와 문화","금융과 경제생활","전자기와 양자","화학 반응의 세계","생물의 유전","행성우주과학"]},
+  {g:3,s:1,pick:"택1",subj:["일본 문화","중국 문화","스페인어권 문화"]},
+  {g:3,s:2,pick:"택1",subj:["언어생활 탐구","심화영어 독해와 작문","실용 통계"]},
+  {g:3,s:2,pick:"택1",subj:["미술과 매체","음악 감상과 비평"]},
+  {g:3,s:2,pick:"택3",subj:["여행지리","인문학과 윤리","사회문제 탐구","기후변화와 지속가능한 세계","과학의 역사와 문화","기후변화와 환경생태","융합과학 탐구"]},
+  {g:3,s:2,pick:"택1",subj:["심화 일본어","심화 중국어","심화 스페인어"]}]},
+
+{id:"bm", name:"백마고", region:"동구", type:"일반", slogan:"스스로 서고 더불어 성장하는 행복한 학교", note:"음악 연주와 창작·미술 창작을 전원 이수(학교지정)하고, 3학년 2학기에 <b>전문 수학(전문교과)</b>·심화영어를 개설. 2학년 1학기부터 융합과학 탐구·기하를 열어 이공계 조기 심화가 가능함.", tags:["전문 수학 개설","예술 실기 전원 이수"], groups:[
+  {g:2,s:1,pick:"택3",subj:["세계시민과 지리","역사로 탐구하는 현대세계","정치","현대사회와 윤리","물리학","화학","융합과학 탐구","기하"]},
+  {g:2,s:1,pick:"택1",subj:["기술·가정","일본어","중국어"]},
+  {g:2,s:2,pick:"택3",subj:["도시의 미래 탐구","세계사","법과 사회","윤리문제 탐구","역학과 에너지","물질과 에너지","생명과학","지구과학"]},
+  {g:2,s:2,pick:"택1",subj:["생활과학 탐구","인공지능 기초"]},
+  {g:3,s:1,pick:"택1",subj:["문학과 영상","미적분II","세계문화와 영어"]},
+  {g:3,s:1,pick:"택3",subj:["여행지리","동아시아 역사 기행","사회와 문화","윤리와 사상","전자기와 양자","화학 반응의 세계","세포와 물질대사","생물의 유전","지구시스템과학"]},
+  {g:3,s:1,pick:"택1",subj:["데이터 과학","일본어 회화","중국어 회화"]},
+  {g:3,s:2,pick:"택1",subj:["매체 의사소통","전문 수학","심화영어"]},
+  {g:3,s:2,pick:"택3",subj:["기후변화와 지속가능한 세계","한국사 심화 탐구","사회문제 탐구","인문학과 윤리","행성우주과학","과학의 역사와 문화","기후변화와 환경생태"]},
+  {g:3,s:2,pick:"택1",subj:["일본 문화","중국 문화"]}]},
+
+{id:"bs", name:"백석고", region:"동구", type:"자율형 공립고 2.0", slogan:"지금보다 나은 나, 지금보다 나은 우리", note:"자공고 2.0. 2학년부터 <b>국제 관계의 이해</b>를 개설하는 드문 학교이고, 3학년에 정보과학·로봇과 공학세계·창의공학 설계 등 공학 라인과 인간과 경제·논술 등 교양 라인을 함께 운영. 선택군이 잘게 나뉘어(택2+택3) 맞춤 조합에 유리.", tags:["자공고 2.0","국제 관계의 이해","정보과학·로봇"], groups:[
+  {g:2,s:1,pick:"택3",subj:["세계사","사회와 문화","국제 관계의 이해","도시의 미래 탐구","현대사회와 윤리","물리학","화학","생명과학","기후변화와 환경생태"]},
+  {g:2,s:1,pick:"택2",subj:["중국어","일본어","데이터 과학","아동발달과 부모","수학과제 탐구","여행지리"]},
+  {g:2,s:2,pick:"택3",subj:["경제","정치","세계시민과 지리","윤리와 사상","역학과 에너지","화학 반응의 세계","세포와 물질대사","지구과학"]},
+  {g:2,s:2,pick:"택2",subj:["중국 문화","일본 문화","인공지능 기초","지식 재산 일반","기하","역사로 탐구하는 현대세계"]},
+  {g:3,s:1,pick:"택2",subj:["한국사 심화 탐구","법과 사회","한국지리 탐구","사회문제 탐구","윤리문제 탐구","전자기와 양자","물질과 에너지","생물의 유전","지구시스템과학","행성우주과학"]},
+  {g:3,s:1,pick:"택1",subj:["미술 창작","음악 감상과 비평"]},
+  {g:3,s:1,pick:"택1",subj:["인간과 경제","논술"]},
+  {g:3,s:1,pick:"택2",subj:["중국어 회화","일본어 회화","미적분II","생태와 환경","정보과학","로봇과 공학세계"]},
+  {g:3,s:2,pick:"택3",subj:["한국사 심화 탐구","금융과 경제생활","인문학과 윤리","여행지리","융합과학 탐구","기후변화와 환경생태","과학의 역사와 문화","기후변화와 지속가능한 세계"]},
+  {g:3,s:2,pick:"택1",subj:["미술과 매체","음악과 미디어"]},
+  {g:3,s:2,pick:"택2",subj:["심화 중국어","심화 일본어","소프트웨어와 생활","수학과 문화","인간과 철학","창의공학 설계"]},
+  {g:3,s:2,pick:"택2",subj:["문학과 영상","매체 의사소통","심화영어 독해와 작문","세계문화와 영어"]}]},
+
+{id:"bsin", name:"백신고", region:"동구", type:"과학중점학교", slogan:"긍지 높은 백신인, 세계 속의 백신고", note:"<b>과학중점학교(자연과학부)</b>. 2학년에 물·화·생·지 4과목을 동시 개방하고 3학년 교과(군)간 선택(택2×2회)으로 과학Ⅱ 전 영역을 끝까지 이수 가능. 인간과 심리·과학창의연구 등 교양 선택과 관광중국어·관광일본어도 개설.", tags:["과학중점","과학Ⅱ 전 과목","과학창의연구"], groups:[
+  {g:2,s:1,pick:"택4",subj:["세계시민과 지리","세계사","사회와 문화","현대사회와 윤리","물리학","화학","생명과학","지구과학"]},
+  {g:2,s:1,pick:"택1",subj:["음악 연주와 창작","미술 창작"]},
+  {g:2,s:1,pick:"택1",subj:["중국어","일본어","인공지능 기초"]},
+  {g:2,s:2,pick:"택4",subj:["도시의 미래 탐구","동아시아 역사 기행","법과 사회","경제","윤리와 사상","인문학과 윤리","역학과 에너지","물질과 에너지","세포와 물질대사","지구시스템과학","융합과학 탐구"]},
+  {g:2,s:2,pick:"택1",subj:["음악 감상과 비평","미술 감상과 비평"]},
+  {g:2,s:2,pick:"택1",subj:["중국 문화","일본 문화","인공지능 기초","기하"]},
+  {g:3,s:1,pick:"택2",subj:["여행지리","사회문제 탐구","윤리문제 탐구","역사로 탐구하는 현대세계","전자기와 양자","화학 반응의 세계","생물의 유전","행성우주과학","과학의 역사와 문화","기후변화와 환경생태"]},
+  {g:3,s:1,pick:"택1",subj:["주제 탐구 독서","심화영어 독해와 작문","미적분II"]},
+  {g:3,s:1,pick:"택1",subj:["중국어 회화","일본어 회화","로봇과 공학세계","생활과학 탐구"]},
+  {g:3,s:1,pick:"택1",subj:["인간과 심리","과학창의연구"]},
+  {g:3,s:2,pick:"택2",subj:["여행지리","사회문제 탐구","윤리문제 탐구","역사로 탐구하는 현대세계","전자기와 양자","화학 반응의 세계","생물의 유전","행성우주과학","과학의 역사와 문화","기후변화와 환경생태"]},
+  {g:3,s:2,pick:"택1",subj:["매체 의사소통","미디어 영어","전문 수학"]},
+  {g:3,s:2,pick:"택1",subj:["관광 일본어","관광 중국어","지식 재산 일반","아동발달과 부모"]},
+  {g:3,s:2,pick:"택1",subj:["세계시민","진로와 직업"]}]},
+
+{id:"sw", name:"세원고", region:"서구", type:"일반", slogan:"탐구하는 창조인 · 극복하는 의지인 · 봉사하는 사회인", note:"2학년 2학기에 <b>과학과제 연구</b>, 3학년에 <b>국제 관계의 이해</b>·경제 수학을 개설. 택4 대형 선택군으로 사·과탐을 자유 조합할 수 있고, 3학년 2학기 융합 선택폭(택3×2회)이 넓어 진로 마무리 설계가 쉬움.", tags:["과학과제 연구","국제 관계의 이해","경제 수학"], groups:[
+  {g:2,s:1,pick:"택4",subj:["주제 탐구 독서","기하","세계시민과 지리","세계사","현대사회와 윤리","정치","물리학","화학","생명과학","지구과학"]},
+  {g:2,s:1,pick:"택1",subj:["일본어","중국어","한문"]},
+  {g:2,s:2,pick:"택4",subj:["인공지능 수학","사회와 문화","한국지리 탐구","동아시아 역사 기행","윤리와 사상","역학과 에너지","물질과 에너지","세포와 물질대사","지구시스템과학","과학과제 연구"]},
+  {g:2,s:2,pick:"택1",subj:["일본어 회화","중국어 회화","한문 고전 읽기"]},
+  {g:3,s:1,pick:"택1",subj:["주제 탐구 독서","미적분II","심화영어 독해와 작문"]},
+  {g:3,s:1,pick:"택3",subj:["법과 사회","경제","인문학과 윤리","국제 관계의 이해","전자기와 양자","화학 반응의 세계","생물의 유전","행성우주과학"]},
+  {g:3,s:1,pick:"택2",subj:["음악 감상과 비평","미술 감상과 비평","창의공학 설계","소프트웨어와 생활","중국 문화","일본 문화"]},
+  {g:3,s:2,pick:"택2",subj:["경제 수학","수학과 문화","실용 통계","영미문학 읽기","세계문화와 영어"]},
+  {g:3,s:2,pick:"택3",subj:["여행지리","사회문제 탐구","금융과 경제생활","과학의 역사와 문화","기후변화와 환경생태","융합과학 탐구"]},
+  {g:3,s:2,pick:"택3",subj:["음악과 미디어","미술 창작","로봇과 공학세계","데이터 과학","심화 중국어","심화 일본어","언어생활과 한자"]}]},
+
+{id:"ag", name:"안곡고", region:"동구", type:"일반", slogan:"더불어 살아가는 창의적인 지성인", note:"학기마다 <b>전 과목을 한 풀에 넣고 택5</b>로 고르는 광폭 선택형. 계열 구분 없이 원하는 대로 조합할 수 있어 융합 진로(예: 경제+코딩, 과학+예술)에 가장 유연한 구조. 단, 스스로 설계할 로드맵이 분명해야 함.", tags:["학기별 택5 광폭 선택","자유 조합형"], groups:[
+  {g:2,s:1,pick:"택5",subj:["인공지능 수학","사회와 문화","세계시민과 지리","현대사회와 윤리","세계사","물리학","화학","생명과학","지구과학","중국어","일본어","데이터 과학","음악 연주와 창작","미술 창작"]},
+  {g:2,s:2,pick:"택5",subj:["기하","정치","법과 사회","한국지리 탐구","윤리와 사상","동아시아 역사 기행","역학과 에너지","물질과 에너지","세포와 물질대사","행성우주과학","중국어 회화","일본어 회화","소프트웨어와 생활","음악과 미디어","미술과 매체"]},
+  {g:3,s:1,pick:"택5",subj:["독서토론과 글쓰기","미적분II","미디어 영어","금융과 경제생활","여행지리","윤리문제 탐구","역사로 탐구하는 현대세계","전자기와 양자","화학 반응의 세계","생물의 유전","지구시스템과학","중국 문화","일본 문화","인공지능 기초","생활과학 탐구","로봇과 공학세계","음악 감상과 비평","미술 감상과 비평","스포츠 생활2"]},
+  {g:3,s:2,pick:"택5",subj:["문학과 영상","경제 수학","영어 발표와 토론","사회문제 탐구","기후변화와 지속가능한 세계","윤리문제 탐구","역사로 탐구하는 현대세계","융합과학 탐구","기후변화와 환경생태","심화 중국어","심화 일본어","인공지능 기초","아동발달과 부모","지식 재산 일반","음악 감상과 비평","스포츠 생활2"]}]},
+
+{id:"dj", name:"일산대진고", region:"동구", type:"AI·정보교육 중심학교(사립)", slogan:"능력 있는 창조적 지식인 육성, 건강하고 예절바른 생활인 육성", note:"<b>AI·정보교육 중심학교</b>. 「데이터 과학 → 데이터 과학과 머신러닝 → 수리와 인공지능」으로 이어지는 관내 유일의 AI 심화 트랙 보유. <b>교육의 이해(교직)·보건·인간과 심리</b>도 개설되어 교대·간호 진로까지 커버.", tags:["AI 심화 트랙","교육의 이해","보건"], groups:[
+  {g:2,s:1,pick:"택1",subj:["중국어","일본어","한문"]},
+  {g:2,s:1,pick:"택3",subj:["세계시민과 지리","세계사","사회와 문화","현대사회와 윤리","물리학","화학","생명과학","지구과학","데이터 과학"]},
+  {g:2,s:2,pick:"택1",subj:["주제 탐구 독서","기하","미디어 영어"]},
+  {g:2,s:2,pick:"택1",subj:["중국 문화","일본 문화","언어생활과 한자"]},
+  {g:2,s:2,pick:"택3",subj:["한국지리 탐구","동아시아 역사 기행","경제","법과 사회","윤리와 사상","역학과 에너지","물질과 에너지","세포와 물질대사","지구시스템과학","데이터 과학과 머신러닝"]},
+  {g:3,s:1,pick:"택1",subj:["문학과 영상","미적분II","경제 수학","인공지능 수학","영미문학 읽기"]},
+  {g:3,s:1,pick:"택1",subj:["인간과 심리","보건"]},
+  {g:3,s:1,pick:"택3",subj:["도시의 미래 탐구","문화로 보는 한국사","정치","국제 관계의 이해","인문학과 윤리","전자기와 양자","화학 반응의 세계","생물의 유전","행성우주과학","수리와 인공지능"]},
+  {g:3,s:2,pick:"택1",subj:["교육의 이해","논술"]},
+  {g:3,s:2,pick:"택3",subj:["여행지리","역사로 탐구하는 현대세계","사회문제 탐구","금융과 경제생활","윤리문제 탐구","기후변화와 지속가능한 세계","과학의 역사와 문화","기후변화와 환경생태","융합과학 탐구","소프트웨어와 생활"]}]},
+
+{id:"isd", name:"일산동고", region:"서구", type:"과학중점학교", slogan:"바른 품성과 참된 능력을 겸비한 창의적인 미래인재로 성장하는 배움터", note:"<b>과학중점학교</b>. 2학년부터 창의공학 설계·소프트웨어와 생활을, 3학년에 <b>과학과제 연구</b>를 개설해 「과학 4과목 → Ⅱ과목 → 연구」 풀코스가 가능. 택4 대형 선택군이라 인문 조합도 무리 없이 짜임.", tags:["과학중점","과학과제 연구","창의공학 설계"], groups:[
+  {g:2,s:1,pick:"택1",subj:["소프트웨어와 생활","일본어","중국어"]},
+  {g:2,s:1,pick:"택4",subj:["주제 탐구 독서","세계시민과 지리","현대사회와 윤리","세계사","사회와 문화","물리학","화학","생명과학","지구과학","창의공학 설계"]},
+  {g:2,s:2,pick:"택1",subj:["프로그래밍","일본어 회화","중국어 회화"]},
+  {g:2,s:2,pick:"택4",subj:["문학과 영상","기하","미디어 영어","여행지리","도시의 미래 탐구","인문학과 윤리","역사로 탐구하는 현대세계","법과 사회","경제","역학과 에너지","물질과 에너지","세포와 물질대사","행성우주과학","로봇과 공학세계"]},
+  {g:3,s:1,pick:"택1",subj:["음악 감상과 비평","미술 감상과 비평"]},
+  {g:3,s:1,pick:"택4",subj:["미적분II","세계문화와 영어","한국지리 탐구","정치","사회문제 탐구","윤리와 사상","동아시아 역사 기행","전자기와 양자","화학 반응의 세계","생물의 유전","지구시스템과학","과학과제 연구","중국 문화","일본 문화","지식 재산 일반","인공지능 기초"]},
+  {g:3,s:2,pick:"택1",subj:["미술 창작","음악 연주와 창작"]},
+  {g:3,s:2,pick:"택4",subj:["금융과 경제생활","윤리문제 탐구","문화로 보는 한국사","기후변화와 지속가능한 세계","융합과학 탐구","과학의 역사와 문화","기후변화와 환경생태","심화 중국어","심화 일본어","생활과학 탐구","데이터 과학"]}]},
+
+{id:"jd", name:"저동고", region:"동구", type:"일반", slogan:"학생주도형 교육으로 역량있는 미래 인재 육성", note:"3학년에 <b>교육의 이해·논리와 사고·인간과 경제활동</b> 등 교양 선택이 다양하고 <b>국제 관계의 이해</b>세계 문화와 영어, 인공지능 융합프로젝트개설. 3학년 기초(택3)+탐구(택3)+교양+예술+교과간(택2) 다층 구조로 인문·사회·자연과학·공학·사범 계열 설계가 정교함.", tags:["대입 실적 우수학교","교육의 이해","국제 관계의 이해","교양 선택 다양","문이과의 조화"], groups:[
+  {g:2,s:1,pick:"택1",subj:["일본어","중국어","인공지능 기초"]},
+  {g:2,s:1,pick:"택4",subj:["기하","사회와 문화","세계시민과 지리","세계사","현대사회와 윤리","물리학","화학","생명과학","지구과학"]},
+  {g:2,s:2,pick:"택1",subj:["일본 문화","중국 문화","데이터 과학"]},
+  {g:2,s:2,pick:"택4",subj:["인공지능 수학","경제 수학","동아시아 역사 기행","윤리와 사상","법과 사회","경제","한국지리 탐구","역학과 에너지","물질과 에너지","생물의 유전","지구시스템과학"]},
+  {g:3,s:1,pick:"택3",subj:["문학과 영상","주제 탐구 독서","수학과 문화","수학과제 탐구","세계문화와 영어","영미문학 읽기"]},
+  {g:3,s:1,pick:"택3",subj:["정치","도시의 미래 탐구","문화로 보는 한국사","윤리문제 탐구","금융과 경제생활","사회문제 탐구","전자기와 양자","화학 반응의 세계","세포와 물질대사","행성우주과학"]},
+  {g:3,s:1,pick:"택1",subj:["음악 연주와 창작","미술 창작"]},
+  {g:3,s:1,pick:"택1",subj:["논술","교육의 이해"]},
+  {g:3,s:1,pick:"택2",subj:["미적분II","인공지능융합프로젝트","일본어 회화","중국어 회화"]},
+  {g:3,s:2,pick:"택3",subj:["역사로 탐구하는 현대세계","인문학과 윤리","국제 관계의 이해","여행지리","기후변화와 지속가능한 세계","융합과학 탐구","기후변화와 환경생태","과학의 역사와 문화"]},
+  {g:3,s:2,pick:"택1",subj:["음악 감상과 비평","미술 감상과 비평"]},
+  {g:3,s:2,pick:"택1",subj:["논리와 사고","인간과 경제활동"]},
+  {g:3,s:2,pick:"택2",subj:["창의공학 설계","소프트웨어와 생활","심화 일본어","심화 중국어"]}]},
+
+{id:"jh", name:"저현고", region:"동구", type:"자율형 공립고 2.0", slogan:"인성과 실력을 갖추고, 생각하고 표현할 줄 아는 저현인 육성", note:"자공고 2.0. 수학을 <b>단계형(2학년 미적분I/확률과 통계 택1 → 3학년 확률과 통계/미적분II 택1)</b>으로 운영해 수준별 설계가 가능. 3학년 택3 풀이 매우 커서(14과목+) 막판 진로 변경에도 대응이 쉬움. <b>심화체육 전공실기</b> 개설.", tags:["자공고 2.0","단계형 수학","심화체육 전공실기"], groups:[
+  {g:2,s:1,pick:"택1",subj:["미적분I","확률과 통계"]},
+  {g:2,s:1,pick:"택1",subj:["주제 탐구 독서","영미문학 읽기","미적분I"]},
+  {g:2,s:1,pick:"택1",subj:["문학과 영상","세계문학과 영어","인공지능 수학","기하"]},
+  {g:2,s:1,pick:"택3",subj:["세계시민과 지리","세계사","정치","윤리와 사상","물리학","화학","생명과학","지구과학"]},
+  {g:2,s:1,pick:"택1",subj:["정보","일본어","중국어"]},
+  {g:2,s:2,pick:"택3",subj:["도시의 미래 탐구","동아시아 역사 기행","경제","현대사회와 윤리","역학과 에너지","물질과 에너지","세포와 물질대사","지구시스템과학"]},
+  {g:2,s:2,pick:"택1",subj:["인공지능 기초","일본어 회화","중국어 회화"]},
+  {g:3,s:1,pick:"택1",subj:["확률과 통계","미적분II"]},
+  {g:3,s:1,pick:"택1",subj:["음악 연주와 창작","미술 창작"]},
+  {g:3,s:1,pick:"택3",subj:["여행지리","문화로 보는 한국사","금융과 경제생활","윤리문제 탐구","사회와 문화","한국지리 탐구","전자기와 양자","생물의 유전","화학 반응의 세계","행성우주과학","융합과학 탐구","일본 문화","중국 문화","데이터 과학"]},
+  {g:3,s:2,pick:"택1",subj:["음악 감상과 비평","미술 감상과 비평"]},
+  {g:3,s:2,pick:"택3",subj:["기후변화와 지속가능한 세계","역사로 탐구하는 현대세계","사회문제 탐구","인문학과 윤리","융합과학 탐구","기후변화와 환경생태","과학의 역사와 문화","심화 일본어","심화 중국어","인공지능 생활탐구","심화체육 전공실기"]}]},
+
+{id:"jb", name:"정발고", region:"동구", type:"과학중점학교", slogan:"자주적인 사람, 철학적인 사람, 창조적인 사람", note:"<b>과학중점학교</b>. 2~3학년 내내 택4 대형 선택군에 과학Ⅱ 과목을 반복 개방(3학년 1·2학기 모두 전자기와 양자 등 선택 가능)해 과학 이수 설계가 가장 유연한 편. <b>기초체육 전공실기</b>·수학과제 탐구도 선택 가능.", tags:["과학중점","과탐Ⅱ 반복 개방","기초체육 전공실기"], groups:[
+  {g:2,s:1,pick:"택4",subj:["세계시민과 지리","동아시아 역사 기행","법과 사회","경제","윤리와 사상","윤리문제 탐구","물리학","화학","생명과학","지구과학","과학의 역사와 문화","세계문화와 영어"]},
+  {g:2,s:1,pick:"택1",subj:["일본어","중국어","프로그래밍"]},
+  {g:2,s:2,pick:"택4",subj:["세계사","정치","인문학과 윤리","한국지리 탐구","사회문제 탐구","역학과 에너지","물질과 에너지","세포와 물질대사","지구시스템과학","기후변화와 환경생태","융합과학 탐구","문학과 영상","기하"]},
+  {g:2,s:2,pick:"택1",subj:["중국어 회화","일본어 회화","로봇과 공학세계","인공지능 기초","아동발달과 부모"]},
+  {g:3,s:1,pick:"택4",subj:["사회와 문화","현대사회와 윤리","도시의 미래 탐구","역사로 탐구하는 현대세계","기후변화와 지속가능한 세계","전자기와 양자","화학 반응의 세계","생물의 유전","행성우주과학","기후변화와 환경생태","융합과학 탐구","미적분II","기초체육 전공실기"]},
+  {g:3,s:1,pick:"택1",subj:["중국 문화","일본 문화","생활과학 탐구","데이터 과학","지식 재산 일반"]},
+  {g:3,s:2,pick:"택4",subj:["역사로 탐구하는 현대세계","금융과 경제생활","윤리문제 탐구","여행지리","전자기와 양자","화학 반응의 세계","생물의 유전","행성우주과학","과학의 역사와 문화","수학과제 탐구"]},
+  {g:3,s:2,pick:"택1",subj:["심화 중국어","심화 일본어","창의공학 설계"]}]},
+
+{id:"je", name:"주엽고", region:"서구", type:"과학중점학교", slogan:"더 나은 미래를 위해 꿈과 비전을 키우는 우리 학교", note:"<b>과학중점학교</b>. 과학중점과정 선택 시 물·화·생·지 4과목 전부 + 기하·융합과학 탐구를 이수하는 정통 코스. 3학년 1학기 택4 풀(15과목)과 2학기 택5 풀(15과목)이 매우 커서 일반 학생의 인문 설계도 자유로움. <b>창의과학연구·논술</b> 선택 가능.", tags:["과학중점","창의과학연구","대형 선택 풀"], caution:"과학중점과정 희망 학생은 물리학·화학·생명과학·지구과학을 모두 선택하고 기하·융합과학 탐구를 이수해야 합니다(일반 학생은 융합과학 탐구 선택 불가).", groups:[
+  {g:2,s:1,pick:"택4",subj:["한국지리 탐구","세계사","사회와 문화","현대사회와 윤리","물리학","화학","생명과학","지구과학"]},
+  {g:2,s:1,pick:"택1",subj:["기하","중국어","일본어"]},
+  {g:2,s:2,pick:"택4",subj:["세계시민과 지리","동아시아 역사 기행","정치","법과 사회","윤리와 사상","역학과 에너지","화학 반응의 세계","생물의 유전","행성우주과학"]},
+  {g:2,s:2,pick:"택1",subj:["융합과학 탐구","중국어 회화","일본어 회화"]},
+  {g:3,s:1,pick:"택4",subj:["문화로 보는 한국사","경제","인문학과 윤리","여행지리","전자기와 양자","물질과 에너지","세포와 물질대사","지구시스템과학","기후변화와 환경생태","미적분II","인공지능 기초","한문","중국 문화","생활과학 탐구","창의공학 설계"]},
+  {g:3,s:1,pick:"택1",subj:["음악 감상과 비평","미술 감상과 비평"]},
+  {g:3,s:1,pick:"택1",subj:["논술","창의과학연구"]},
+  {g:3,s:2,pick:"택5",subj:["역사로 탐구하는 현대세계","사회문제 탐구","윤리문제 탐구","기후변화와 지속가능한 세계","전자기와 양자","물질과 에너지","세포와 물질대사","지구시스템과학","과학의 역사와 문화","소프트웨어와 생활","한문 고전 읽기","심화 중국어","지식 재산 일반","아동발달과 부모","생태와 환경"]}]},
+
+{id:"js", name:"중산고", region:"동구", type:"일반", slogan:"꿈을 담고 힘을 길러 미래길을 여는 행복 배움터", note:"<b>스페인어</b>를 개설하는 드문 학교(일본어·한문 포함). <b>미술 방과후 학교</b>를 별도 운영해 예술 진로 지원이 두텁고, 2학년 택2 그룹에 정보·아동발달과 부모·기하가 함께 들어 있어 융합 조합이 가능.", tags:["스페인어","미술 방과후 운영","융합 조합형"], groups:[
+  {g:2,s:1,pick:"택3",subj:["현대사회와 윤리","사회와 문화","정치","세계시민과 지리","세계사","물리학","화학","생명과학","지구과학"]},
+  {g:2,s:1,pick:"택2",subj:["정보","일본어","스페인어","한문","아동발달과 부모","기하"]},
+  {g:2,s:1,pick:"택1",subj:["음악 감상과 비평","미술 창작"]},
+  {g:2,s:2,pick:"택3",subj:["윤리와 사상","경제","법과 사회","한국지리 탐구","동아시아 역사 기행","역학과 에너지","물질과 에너지","세포와 물질대사","지구시스템과학"]},
+  {g:2,s:2,pick:"택2",subj:["인공지능 기초","일본어 회화","스페인어 회화","언어생활과 한자","로봇과 공학세계","인공지능 수학"]},
+  {g:2,s:2,pick:"택1",subj:["음악과 미디어","미술 감상과 비평"]},
+  {g:3,s:1,pick:"택1",subj:["영미문학 읽기","미적분II"]},
+  {g:3,s:1,pick:"택3",subj:["인문학과 윤리","사회문제 탐구","역사로 탐구하는 현대세계","기후변화와 지속가능한 세계","전자기와 양자","화학 반응의 세계","생물의 유전","행성우주과학"]},
+  {g:3,s:1,pick:"택2",subj:["데이터 과학","일본 문화","스페인어권 문화","언어생활과 한자","지식 재산 일반","심화영어"]},
+  {g:3,s:2,pick:"택1",subj:["주제 탐구 독서","미디어 영어","수학과제 탐구"]},
+  {g:3,s:2,pick:"택1",subj:["문학과 영상","실용 통계"]},
+  {g:3,s:2,pick:"택3",subj:["윤리문제 탐구","금융과 경제생활","문화로 보는 한국사","여행지리","기후변화와 환경생태","융합과학 탐구"]},
+  {g:3,s:2,pick:"택2",subj:["소프트웨어와 생활","심화 일본어","심화 스페인어","한문 고전 읽기","생활과학 탐구"]}]},
+
+{id:"pd", name:"풍동고", region:"동구", type:"일반", slogan:"자긍심과 역동성으로 꿈을 이루는 행복한 지성인", note:"2학년부터 택4 대형 선택군에 인문·사회·과학을 모두 담아 균형형으로 운영. 3학년에 <b>국제 관계의 이해</b>·영어 발표와 토론·독서토론과 글쓰기 등 발표·토론형 과목이 풍부해 학생부 활동과 연계하기 좋음.", tags:["균형형","국제 관계의 이해","발표·토론형 과목"], caution:"국어·수학·영어 교과의 이수학점 총합은 81학점을 초과할 수 없습니다(기초 교과 위주 설계 시 유의).", groups:[
+  {g:2,s:1,pick:"택4",subj:["인공지능 수학","사회와 문화","현대사회와 윤리","세계시민과 지리","세계사","윤리와 사상","경제","기후변화와 지속가능한 세계","물리학","화학","생명과학","지구과학"]},
+  {g:2,s:1,pick:"택1",subj:["프로그래밍","중국어","일본어"]},
+  {g:2,s:2,pick:"택4",subj:["기하","현대사회와 윤리","법과 사회","인문학과 윤리","도시의 미래 탐구","동아시아 역사 기행","금융과 경제생활","여행지리","역학과 에너지","물질과 에너지","세포와 물질대사","지구시스템과학"]},
+  {g:2,s:2,pick:"택1",subj:["데이터 과학","중국어 회화","일본어 회화"]},
+  {g:3,s:1,pick:"택3",subj:["독서토론과 글쓰기","미적분II","영어 발표와 토론","정치","한국지리 탐구","역사로 탐구하는 현대세계","사회문제 탐구","윤리문제 탐구","전자기와 양자","화학 반응의 세계","생물의 유전","행성우주과학"]},
+  {g:3,s:1,pick:"택1",subj:["음악 연주와 창작","미술 창작"]},
+  {g:3,s:1,pick:"택1",subj:["인공지능 기초","중국 문화","일본 문화"]},
+  {g:3,s:2,pick:"택3",subj:["주제 탐구 독서","수학과제 탐구","세계문화와 영어","국제 관계의 이해","한국지리 탐구","역사로 탐구하는 현대세계","사회문제 탐구","윤리문제 탐구","융합과학 탐구","기후변화와 환경생태"]},
+  {g:3,s:2,pick:"택1",subj:["음악과 미디어","미술과 매체"]},
+  {g:3,s:2,pick:"택1",subj:["소프트웨어와 생활","심화 중국어","심화 일본어"]}]},
+
+{id:"wj", name:"운정고", region:"파주", type:"자율형 공립고 2.0", slogan:"미래를 향한 도전, 미래핵심인재를 양성하는 운정고", note:"자공고 2.0. <b>고급 미적분·고급 대수·전문 수학·고급 물리학/화학/생명과학/지구과학·과학 4과목 실험</b> 등 전문교과를 학교 선택군에 정식 편성한 유일한 학교 — 이공계 최상위권 심화에 압도적. 온라인 과목으로 <b>미래형 항공기체(AAV)·AI 기반 생물정보학</b>도 운영. 1학년부터 정보/인간과 철학 선택 시작.", tags:["자공고 2.0","고급·전문교과","과학 실험 4종","온라인 특화과목"], groups:[
+  {g:1,s:0,pick:"택1",subj:["음악","미술"]},
+  {g:1,s:0,pick:"택1",subj:["정보","인간과 철학"]},
+  {g:2,s:1,pick:"택5",subj:["중국어","일본어","데이터 과학","미적분I","세계사","정치","현대사회와 윤리","기후변화와 지속가능한 세계","물리학","화학","생명과학","지구과학"]},
+  {g:2,s:2,pick:"택5",subj:["중국 문화","일본 문화","프로그래밍","미적분II","한국지리 탐구","동아시아 역사 기행","사회와 문화","경제","윤리와 사상","역학과 에너지","전자기와 양자","물질과 에너지","화학 반응의 세계","세포와 물질대사","생물의 유전","지구시스템과학","행성우주과학"]},
+  {g:2,s:2,pick:"온라인",subj:["미래형 항공기체(AAV)","인공지능기반 생물정보학 기초와 활용"]},
+  {g:3,s:1,pick:"택5",subj:["인공지능 기초","주제 탐구 독서","심화영어 독해 I","기하","고급 미적분","세계시민과 지리","한국 근현대사","법과 사회","인문학과 윤리","사회문제 탐구","물리학 실험","화학 실험","생명과학 실험","지구과학 실험","고급 물리학","고급 화학","고급 생명과학","고급 지구과학"]},
+  {g:3,s:1,pick:"택1",subj:["음악 연주와 창작","미술 창작"]},
+  {g:3,s:2,pick:"택5",subj:["소프트웨어와 생활","독서토론과 글쓰기","영어 독해와 작문","전문 수학","고급 대수","여행지리","역사로 탐구하는 현대세계","금융과 경제생활","윤리문제 탐구","기후변화와 지속가능한 세계","사회문제 탐구","과학의 역사와 문화","기후변화와 환경생태","융합과학 탐구"]},
+  {g:3,s:2,pick:"택1",subj:["음악 감상과 비평","미술 감상과 비평"]}]},
+
+{id:"dp", name:"동패고", region:"파주", type:"공학·AI 디지털 융합 특성화", slogan:"동패인!! 세계로 품어라 열정, 미래로 펼쳐라 너의 꿈!", note:"<b>공학 AI 디지털 융합 교과 특성화 학교</b>. 1학년부터 기술·가정/생활과학 탐구 선택을 시작하고, 3학년에 정보과학·소프트웨어와 생활을 배치. <b>기초·심화 체육 전공실기</b>를 모두 개설해 체대 입시 대응도 가능.", tags:["공학·AI 특성화","정보과학","체육 전공실기 2종"], groups:[
+  {g:1,s:0,pick:"택1",subj:["기술·가정","생활과학 탐구"]},
+  {g:2,s:1,pick:"택3",subj:["주제 탐구 독서","미디어 영어","수학과제 탐구","세계시민과 지리","세계사","현대사회와 윤리","사회와 문화","정치","물리학","화학","생명과학","지구과학"]},
+  {g:2,s:1,pick:"택1",subj:["정보","한문"]},
+  {g:2,s:1,pick:"택1",subj:["중국어","일본어"]},
+  {g:2,s:1,pick:"택1",subj:["음악","미술"]},
+  {g:2,s:2,pick:"택3",subj:["문학과 영상","세계문화와 영어","기하","한국지리 탐구","동아시아 역사 기행","윤리와 사상","법과 사회","경제","역학과 에너지","화학 반응의 세계","생물의 유전","지구시스템과학"]},
+  {g:2,s:2,pick:"택1",subj:["인공지능 기초","언어생활과 한자"]},
+  {g:2,s:2,pick:"택1",subj:["중국어 회화","일본어 회화"]},
+  {g:2,s:2,pick:"택1",subj:["음악","미술"]},
+  {g:3,s:1,pick:"택4",subj:["미적분II","여행지리","역사로 탐구하는 현대세계","윤리문제 탐구","사회문제 탐구","전자기와 양자","세포와 물질대사","행성우주과학","기초체육 전공실기","한문 고전 읽기","중국 문화","일본 문화","소프트웨어와 생활"]},
+  {g:3,s:1,pick:"택1",subj:["음악 연주와 창작","미술 창작"]},
+  {g:3,s:1,pick:"택1",subj:["생태와 환경","진로와 직업","논술"]},
+  {g:3,s:2,pick:"택4",subj:["수학과 문화","금융과 경제생활","인문학과 윤리","기후변화와 지속가능한 세계","과학의 역사와 문화","기후변화와 환경생태","심화체육 전공실기","한문 고전 읽기","중국 문화","일본 문화","정보과학"]},
+  {g:3,s:2,pick:"택1",subj:["음악 감상과 비평","미술 감상과 비평"]},
+  {g:3,s:2,pick:"택1",subj:["생태와 환경","진로와 직업","논술"]}]},
+
+{id:"jis", name:"지산고", region:"파주", type:"일반", slogan:"다함께 배움을 나누며 꿈을 향해 성장하는 행복한 배움터", note:"3학년에 <b>관광 일본어·관광 중국어</b>(전문교과)와 국제 관계의 이해를 개설해 관광·국제 진로에 특색. 창의공학 설계·로봇과 공학세계·데이터 과학 등 공학 라인도 고르게 갖춤.", tags:["관광 외국어","국제 관계의 이해","공학 라인"], groups:[
+  {g:2,s:1,pick:"택4",subj:["세계시민과 지리","세계사","사회와 문화","현대사회와 윤리","물리학","화학","생명과학","지구과학"]},
+  {g:2,s:1,pick:"택1",subj:["일본어","중국어","데이터 과학"]},
+  {g:2,s:2,pick:"택2",subj:["한국지리 탐구","법과 사회","동아시아 역사 기행","경제","역학과 에너지","물질과 에너지","세포와 물질대사","행성우주과학"]},
+  {g:2,s:2,pick:"택1",subj:["사회문제 탐구","윤리문제 탐구","기후변화와 지속가능한 세계","융합과학 탐구","기후변화와 환경생태"]},
+  {g:2,s:2,pick:"택1",subj:["일본어 회화","중국어 회화","기하"]},
+  {g:2,s:2,pick:"택1",subj:["음악 감상과 비평","미술 창작"]},
+  {g:3,s:1,pick:"택1",subj:["언어생활 탐구","미디어 영어","경제 수학","미적분II"]},
+  {g:3,s:1,pick:"택2",subj:["도시의 미래 탐구","정치","윤리와 사상","전자기와 양자","화학 반응의 세계","생물의 유전","지구시스템과학"]},
+  {g:3,s:1,pick:"택1",subj:["음악과 미디어","미술과 매체"]},
+  {g:3,s:1,pick:"택1",subj:["인공지능 기초","로봇과 공학세계","생활과학 탐구","일본 문화","중국 문화"]},
+  {g:3,s:2,pick:"택1",subj:["인공지능 수학","실용 통계"]},
+  {g:3,s:2,pick:"택2",subj:["인문학과 윤리","국제 관계의 이해","전자기와 양자","화학 반응의 세계","생물의 유전","지구시스템과학"]},
+  {g:3,s:2,pick:"택2",subj:["여행지리","역사로 탐구하는 현대세계","금융과 경제생활","과학의 역사와 문화"]},
+  {g:3,s:2,pick:"택1",subj:["문학과 영상","세계문화와 영어","소프트웨어와 생활"]},
+  {g:3,s:2,pick:"택1",subj:["창의공학 설계","아동발달과 부모","관광 일본어","관광 중국어"]}]},
+
+{id:"hb", name:"한빛고", region:"파주", type:"정보교육 중심학교", slogan:"조화로운 지혜와 창의적 도전으로 성장하는 한빛인", note:"<b>정보교육 중심학교</b>. 2학년부터 프로그래밍을 열고 3학년까지 인공지능 수학·인공지능 기초 선택 기회를 학기마다 배치. <b>스페인어 트랙</b>(스페인어→회화→권문화)과 학교지정 <b>전문 수학·논술</b>도 특징.", tags:["정보교육 중심","스페인어 트랙","전문 수학 지정"], groups:[
+  {g:2,s:1,pick:"택3",subj:["세계시민과 지리","세계사","사회와 문화","현대사회와 윤리","물리학","화학","생명과학"]},
+  {g:2,s:1,pick:"택1",subj:["스페인어","일본어","프로그래밍"]},
+  {g:2,s:2,pick:"택3",subj:["도시의 미래 탐구","동아시아 역사 기행","법과 사회","경제","인문학과 윤리","역학과 에너지","물질과 에너지","세포와 물질대사","지구과학"]},
+  {g:2,s:2,pick:"택1",subj:["스페인어 회화","일본어 회화","스페인어","일본어"]},
+  {g:2,s:2,pick:"택1",subj:["문학과 영상","세계문화와 영어","소프트웨어와 생활"]},
+  {g:3,s:1,pick:"택1",subj:["미적분II","실용 통계"]},
+  {g:3,s:1,pick:"택1",subj:["주제 탐구 독서","심화영어 독해와 작문","기하","인공지능 수학"]},
+  {g:3,s:1,pick:"택2",subj:["정치","윤리와 사상","문화로 보는 한국사","한국지리 탐구","전자기와 양자","화학 반응의 세계","생물의 유전","행성우주과학","지구시스템과학"]},
+  {g:3,s:1,pick:"택1",subj:["사회문제 탐구","기후변화와 지속가능한 세계","역사로 탐구하는 현대세계","융합과학 탐구","기후변화와 환경생태"]},
+  {g:3,s:1,pick:"택1",subj:["음악 연주와 창작","미술과 매체"]},
+  {g:3,s:1,pick:"택1",subj:["스페인어권 문화","일본 문화","인공지능 기초"]},
+  {g:3,s:2,pick:"택1",subj:["독서토론과 글쓰기","영미문학 읽기","기하","인공지능 수학","인공지능 기초"]},
+  {g:3,s:2,pick:"택2",subj:["역사로 탐구하는 현대세계","사회문제 탐구","윤리문제 탐구","여행지리","과학의 역사와 문화","기후변화와 환경생태"]},
+  {g:3,s:2,pick:"택1",subj:["음악 감상과 비평","미술 감상과 비평"]}]}
+];
+
+/* ───────────────── 특성화 가산점 (계열 적합도 보정) ───────────────── */
+const BONUS = {
+ bsin:{nat:[4,'과학중점학교(자연과학부)'],med:[3,'과학중점학교'],pharm:[3,'과학중점학교'],eng:[3,'과학중점학교'],cs:[1,'과학중점 기반']},
+ isd:{nat:[4,'과학중점학교'],med:[3,'과학중점학교'],pharm:[3,'과학중점학교'],eng:[3,'과학중점학교'],cs:[1,'과학중점 기반']},
+ jb:{nat:[4,'과학중점학교'],med:[3,'과학중점학교'],pharm:[3,'과학중점학교'],eng:[3,'과학중점학교'],pe:[1,'기초체육 전공실기']},
+ je:{nat:[4,'과학중점학교(과학중점과정)'],med:[3,'과학중점학교'],pharm:[3,'과학중점학교'],eng:[3,'과학중점학교']},
+ wj:{nat:[6,'고급과학·실험 등 전문교과 편성'],eng:[5,'고급수학·전문교과 + AAV 온라인'],med:[4,'고급 생명과학·실험 + 생물정보학'],pharm:[4,'고급 화학·실험'],cs:[2,'AI 온라인 과목·프로그래밍']},
+ dj:{cs:[5,'AI·정보교육 중심학교(머신러닝·수리와 인공지능)'],edu:[3,'교육의 이해 개설(교직 탐색)'],nurse:[2,'보건·인간과 심리 개설']},
+ hb:{cs:[3,'정보교육 중심학교'],lang:[2,'스페인어 3년 트랙']},
+ di:{lang:[3,'스페인어 포함 외국어 3트랙 3년 연계'],intl:[1,'외국어 다양']},
+ js:{lang:[2,'스페인어 개설'],art:[2,'미술 방과후 학교 운영']},
+ gj:{pe:[4,'체육과 중점(골프 특강·체대 지도)+전공실기'],lang:[1,'중국어과 중점 프로그램'],econ:[1,'경제(NIE) 중점 프로그램']},
+ dp:{eng:[3,'공학 AI 디지털 융합 특성화'],cs:[3,'공학·AI 특성화 + 정보과학'],pe:[2,'기초·심화 전공실기 모두 개설']},
+ jis:{lang:[1,'관광 중국어·관광 일본어'],intl:[1,'관광·국제 특색']},
+ bm:{art:[1,'음악 연주와 창작·미술 창작 전원 이수']},
+ jh:{pe:[1,'심화체육 전공실기 개설']}
+};
+const ALLBONUS = { bs:[1,'자율형 공립고 2.0'], jh:[1,'자율형 공립고 2.0'], wj:[1,'자율형 공립고 2.0'], ag:[1,'택5 광폭 선택(조합 자유도)'] };
+
+/* ───────────────── 유틸 ───────────────── */
+const norm = s => s.replace(/[\s·]/g,'').replace(/Ⅰ/g,'I').replace(/Ⅱ/g,'II');
+const REGION = {'서구':{label:'일산서구',color:'var(--seo)'},'동구':{label:'일산동구',color:'var(--dong)'},'파주':{label:'파주 운정',color:'var(--paju)'}};
+const esc = s => s.replace(/&/g,'&amp;').replace(/</g,'&lt;');
+
+TRACKS.forEach(t=>{ t.coreN = new Set(t.core.map(norm)); t.plusN = new Set(t.plus.map(norm)); });
+
+function matchLevel(track, subj){
+  const n = norm(subj);
+  if(track.coreN.has(n)) return 2;
+  if(track.plusN.has(n)) return 1;
+  return 0;
+}
+function scoreSchool(school, track){
+  const seen = new Set(); let score = 0; const coreHits = [];
+  school.groups.forEach(gr => gr.subj.forEach(s => {
+    const n = norm(s); if(seen.has(n)) return; seen.add(n);
+    const lv = matchLevel(track, s);
+    if(lv===2){ score+=2; coreHits.push(s); } else if(lv===1){ score+=1; }
+  }));
+  const reasons = [];
+  const b = (BONUS[school.id]||{})[track.id];
+  if(b){ score += b[0]; reasons.push(b[1]); }
+  const ab = ALLBONUS[school.id];
+  if(ab){ score += ab[0]; reasons.push(ab[1]); }
+  return {score, coreHits, reasons};
+}
+
+/* 희소 과목: 개설 학교 3곳 이하 */
+let subjCount = {};
+function recomputeSubjCount(){
+  subjCount = {};
+  SCHOOLS.forEach(sc=>{
+    const set = new Set(); sc.groups.forEach(g=>g.subj.forEach(s=>set.add(norm(s))));
+    set.forEach(n=>subjCount[n]=(subjCount[n]||0)+1);
+  });
+}
+recomputeSubjCount();
+function rareSubjects(school){
+  const seen = new Set(); const out = [];
+  school.groups.forEach(g=>g.subj.forEach(s=>{
+    const n = norm(s);
+    if(seen.has(n)) return; seen.add(n);
+    if(subjCount[n]<=3) out.push(s);
+  }));
+  return out;
+}
+
+/* ───────────────── 상태 ───────────────── */
+const state = { school: SCHOOLS[0].id, tab: 1, track: null, cmpTrack: 'eng', picks: [] };
+const $ = sel => document.querySelector(sel);
+const cur = () => SCHOOLS.find(s=>s.id===state.school);
+function refreshTrackCache(){ TRACKS.forEach(t=>{ t.coreN = new Set(t.core.map(norm)); t.plusN = new Set(t.plus.map(norm)); }); }
+
+/* ───────────────── 좌측 학교 목록 ───────────────── */
+function renderNav(){
+  const nav = $('#schoolNav'); let html = '';
+  ['서구','동구','파주'].forEach(r=>{
+    const list = SCHOOLS.filter(s=>s.region===r);
+    if(!list.length) return;
+    html += `<div class="region-group">
+      <div class="region-title"><span class="dot" style="background:${REGION[r].color}"></span>${REGION[r].label} <span style="font-weight:400">· ${list.length}개교</span></div>
+      <div class="school-list-wrap">` +
+      list.map(s=>{
+        const on = state.picks.includes(s.id);
+        return `<button class="school-btn ${s.id===state.school?'active':''}" data-id="${s.id}">
+        <span>${s.name}</span>
+        <span class="pick-add ${on?'on':''}" data-pick="${s.id}" role="button" tabindex="0" title="비교에 담기/빼기">${on?'담김 ✓':'담기 ＋'}</span>
+      </button>`;
+      }).join('') + `</div></div>`;
+  });
+  nav.innerHTML = html;
+  nav.querySelectorAll('.school-btn').forEach(b=>b.addEventListener('click',e=>{
+    if(e.target.closest('.pick-add')) return;
+    state.school = b.dataset.id; renderAll();
+    if(window.innerWidth<920) $('#schoolHeader').scrollIntoView({behavior:'smooth'});
+  }));
+  nav.querySelectorAll('.pick-add').forEach(p=>{
+    const toggle = e=>{ e.stopPropagation(); togglePick(p.dataset.pick); };
+    p.addEventListener('click',toggle);
+    p.addEventListener('keydown',e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); toggle(e); }});
+  });
+  renderTray();
+}
+
+function togglePick(id){
+  const i = state.picks.indexOf(id);
+  if(i>=0) state.picks.splice(i,1);
+  else { if(state.picks.length>=3){ alert('비교는 최대 3개교까지 담을 수 있습니다. 먼저 하나를 빼주세요.'); return; } state.picks.push(id); }
+  renderNav();
+}
+
+function renderTray(){
+  const tray = $('#compareTray');
+  if(!state.picks.length){ tray.innerHTML=''; return; }
+  const chips = state.picks.map(id=>{
+    const s = SCHOOLS.find(x=>x.id===id);
+    return `<div class="tray-chip"><span>${s?s.name+'등학교':id}</span><button data-rm="${id}" aria-label="빼기">×</button></div>`;
+  }).join('');
+  tray.innerHTML = `<div class="tray-inner">
+    <div class="tray-title"><span>비교 담기 (${state.picks.length}/3)</span></div>
+    ${chips}
+    <button class="tray-print" id="trayPrint" ${state.picks.length<1?'disabled':''}>🖨 선택 학교 비교·인쇄</button>
+  </div>`;
+  tray.querySelectorAll('[data-rm]').forEach(b=>b.addEventListener('click',()=>togglePick(b.dataset.rm)));
+  $('#trayPrint').addEventListener('click', printComparison);
+}
+
+/* ───────────────── 헤더 + 탭 ───────────────── */
+function renderHeader(){
+  const s = cur(); const r = REGION[s.region];
+  $('#schoolHeader').innerHTML = `
+    <div class="sh-top">
+      <h2>${s.name}등학교</h2>
+      <span class="badge" style="background:${r.color}">${r.label}</span>
+      <span class="badge type">${s.type}</span>
+    </div>
+    <p class="slogan">${s.slogan}</p>
+    <div class="meta-line"><span>2026학년도 입학생 교육과정 편제표 기준</span><span>연락처·행사 일정은 학교 일반안내 자료 참조</span></div>
+    <div class="tabs">
+      <button class="tab-btn ${state.tab===1?'active':''}" data-t="1">학교 종합정보</button>
+      <button class="tab-btn ${state.tab===2?'active':''}" data-t="2">진학계열 과목설계</button>
+      <button class="tab-btn ${state.tab===3?'active':''}" data-t="3">계열별 학교비교</button>
+    </div>`;
+  document.querySelectorAll('.tab-btn').forEach(b=>b.addEventListener('click',()=>{
+    state.tab = +b.dataset.t; renderAll();
+  }));
+}
+
+/* ───────────────── 탭1: 학교 종합정보 ───────────────── */
+function groupTitle(g){
+  const yr = g.g===1?'1학년':g.g===2?'2학년':'3학년';
+  const sem = g.s===0?'':` ${g.s}학기`;
+  return yr+sem;
+}
+function renderInfo(){
+  const s = cur();
+  const ranked = TRACKS.map(t=>({t,r:scoreSchool(s,t)})).sort((a,b)=>b.r.score-a.r.score).slice(0,4);
+  const rare = rareSubjects(s);
+  const total = s.groups.reduce((a,g)=>a+g.subj.length,0);
+  return `
+  <div class="card"><h3><span class="bar"></span>학교 특색</h3>
+    <p class="note-text">${s.note}</p>
+    <div style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap">${s.tags.map(t=>`<span class="subj" style="background:#E9EFF8;color:#33517E;font-weight:600">${t}</span>`).join('')}</div>
+    ${s.caution?`<div class="caution">⚠ ${s.caution}</div>`:''}
+  </div>
+  <div class="card"><h3><span class="bar"></span>이 학교가 유리한 진학계열 TOP 4</h3>
+    <div class="strength-row">${ranked.map((x,i)=>`<div class="strength-chip">${i+1}위 · ${x.t.name}<small>${x.r.reasons[0]||('핵심 권장과목 '+x.r.coreHits.length+'개 개설')}</small></div>`).join('')}</div>
+    <p class="note-text" style="margin-top:10px;font-size:.8rem;color:#76859C">※ 편제표의 계열 핵심·연관 과목 개설 수와 학교 특성화를 점수화한 결과입니다. 「진학계열 과목설계」 탭에서 과목 단위로 확인하세요.</p>
+  </div>
+  <div class="card"><h3><span class="bar"></span>희소 개설 과목 <span style="font-weight:500;font-size:.78rem;color:#8593A8">(20개교 중 3곳 이하 개설)</span></h3>
+    ${rare.length?`<div class="subj-list">${rare.map(x=>`<span class="subj rec">${x}</span>`).join('')}</div>`:'<p class="note-text">희소 과목 없이 표준 편제로 운영합니다.</p>'}
+  </div>
+  <div class="card"><h3><span class="bar"></span>학생 선택 교육과정 전체 구조 <span style="font-weight:500;font-size:.78rem;color:#8593A8">선택군 ${s.groups.length}개 · 개설 ${total}과목</span></h3>
+    ${s.groups.map(g=>`<div class="group-card" style="border-style:dashed">
+      <div class="group-head"><span class="gy">${groupTitle(g)}</span><span class="gpick">${g.pick}</span></div>
+      <div class="subj-list">${g.subj.map(x=>`<span class="subj">${x}</span>`).join('')}</div>
+    </div>`).join('')}
+  </div>
+  <p class="disclaim">※ 2026학년도 입학생 교육과정 편제표 기준이며, 학교 교육과정 운영에 따라 일부 변경될 수 있습니다. 최종 확인은 각 학교 발표 자료를 따릅니다.</p>`;
+}
+
+/* ───────────────── 탭2: 진학계열 과목설계 ───────────────── */
+function trackChips(activeId, onPick){
+  const wrap = document.createElement('div'); wrap.className='track-chips';
+  wrap.innerHTML = TRACKS.map(t=>`<button class="track-chip ${t.id===activeId?'active':''}" data-id="${t.id}">${t.name}</button>`).join('');
+  wrap.querySelectorAll('.track-chip').forEach(b=>b.addEventListener('click',()=>onPick(b.dataset.id)));
+  return wrap;
+}
+function renderTrackPlan(){
+  const s = cur();
+  const box = document.createElement('div');
+  box.appendChild(trackChips(state.track, id=>{state.track=id; renderAll();}));
+  if(!state.track){
+    box.insertAdjacentHTML('beforeend',`<div class="placeholder"><div class="big">진학 희망 계열을 선택하세요</div>위 계열 버튼을 누르면 ${s.name}에서 학년·학기별로 어떤 과목을 선택해야 하는지 형광펜으로 표시해 드립니다.</div>`);
+    return box;
+  }
+  const t = TRACKS.find(x=>x.id===state.track);
+  const res = scoreSchool(s,t);
+  let html = `<div class="tip"><b>${t.name} 계열 설계 가이드</b> — ${t.note}</div>
+  <div class="legend">표시 안내: <span class="subj rec">✓ 핵심 권장</span> <span class="subj rec soft">✓ 연관 권장</span> <span class="subj">자유 선택</span> · 같은 선택군 안에서 권장 과목을 우선 배치하세요.</div>`;
+  let any = false;
+  s.groups.forEach(g=>{
+    const marked = g.subj.map(x=>({x,lv:matchLevel(t,x)}));
+    const hit = marked.filter(m=>m.lv>0).length;
+    if(!hit) return;
+    any = true;
+    html += `<div class="group-card">
+      <div class="group-head"><span class="gy">${groupTitle(g)}</span><span class="gpick">${g.pick}</span><span class="gmatch-count">권장 ${hit}과목</span></div>
+      <div class="subj-list">${marked.map(m=>`<span class="subj ${m.lv===2?'rec':m.lv===1?'rec soft':''}">${m.x}</span>`).join('')}</div>
+    </div>`;
+  });
+  if(!any) html += `<div class="placeholder">이 계열의 권장 과목이 ${s.name} 학생 선택군에 없습니다. 학교지정 과목 중심으로 내신을 관리하고, 공동교육과정·온라인학교를 활용하세요.</div>`;
+  if(res.reasons.length) html += `<div class="tip" style="margin-top:6px">★ ${s.name} 가산 요인: ${res.reasons.join(' · ')}</div>`;
+  if(s.caution) html += `<div class="caution">⚠ ${s.caution}</div>`;
+  html += `<p class="disclaim">※ 「택N」 선택군에서는 표시된 권장 과목을 우선 선택하되, 남는 선택권은 내신 경쟁력(수강 인원·성취도 분포)을 함께 고려해 결정하세요. 1학년 공통과목과 학교지정 과목(수학·영어 위계 등)은 모든 계열에서 성실 이수가 기본입니다.</p>`;
+  box.insertAdjacentHTML('beforeend',html);
+  return box;
+}
+
+/* ───────────────── 탭3: 계열별 학교비교 ───────────────── */
+function renderCompare(){
+  const box = document.createElement('div');
+  box.appendChild(trackChips(state.cmpTrack, id=>{state.cmpTrack=id; renderAll();}));
+  const t = TRACKS.find(x=>x.id===state.cmpTrack);
+  const rows = SCHOOLS.map(s=>({s,r:scoreSchool(s,t)})).sort((a,b)=>b.r.score-a.r.score);
+  const max = rows[0].r.score || 1;
+  let html = `<div class="tip"><b>${t.name} 계열</b> — ${t.note}</div><div class="card">`;
+  rows.forEach((row,i)=>{
+    const pct = Math.round(row.r.score/max*100);
+    const hits = row.r.coreHits.slice(0,4).join(', ');
+    const reason = [row.r.reasons.join(' · '), hits?`핵심과목: <b>${hits}</b>${row.r.coreHits.length>4?` 외 ${row.r.coreHits.length-4}개`:''}`:''].filter(Boolean).join(' · ');
+    html += `<div class="rank-row ${i<3?'top':''}">
+      <div class="rank-num">${i+1}</div>
+      <div class="rank-name"><span>${row.s.name}</span><span class="rg">${REGION[row.s.region].label} · ${row.s.type.split('(')[0]}</span></div>
+      <div class="rank-bar-wrap"><div class="rank-bar"><i style="width:${pct}%"></i></div><div class="rank-reason">${reason}</div></div>
+    </div>`;
+  });
+  html += `</div><p class="disclaim">※ 적합도 = 계열 핵심 과목(2점)·연관 과목(1점) 개설 수 + 특성화 가산. 교육과정 개설 기준의 상대 비교이며, 내신 경쟁 강도·통학 거리·학교 분위기는 별도로 상담하세요. 학교를 누르면 해당 학교의 과목설계를 바로 볼 수 있습니다.</p>`;
+  box.insertAdjacentHTML('beforeend',html);
+  box.querySelectorAll('.rank-row').forEach((el,i)=>{
+    el.style.cursor='pointer';
+    el.addEventListener('click',()=>{ state.school=rows[i].s.id; state.tab=2; state.track=state.cmpTrack; renderAll(); window.scrollTo({top:0,behavior:'smooth'}); });
+  });
+  return box;
+}
+
+/* ───────────────── 전체 렌더 ───────────────── */
+function renderAll(){
+  renderNav(); renderHeader();
+  const c = $('#content'); c.innerHTML='';
+  if(state.tab===1) c.innerHTML = renderInfo();
+  else if(state.tab===2) c.appendChild(renderTrackPlan());
+  else c.appendChild(renderCompare());
+}
+
+/* ───────────────── 선택 학교 비교·인쇄 ───────────────── */
+function printComparison(){
+  if(!state.picks.length) return;
+  const picked = state.picks.map(id=>SCHOOLS.find(s=>s.id===id)).filter(Boolean);
+  const today = new Date().toLocaleDateString('ko-KR',{year:'numeric',month:'long',day:'numeric'});
+
+  // 계열별 적합도 비교표
+  const cmpRows = TRACKS.map(t=>{
+    const cells = picked.map(s=>scoreSchool(s,t).score);
+    const best = Math.max(...cells);
+    return {name:t.name, cells, best};
+  });
+  let cmpTable = `<table class="print-cmp"><thead><tr><th>진학계열</th>${picked.map(s=>`<th>${s.name}</th>`).join('')}</tr></thead><tbody>`;
+  cmpRows.forEach(r=>{
+    cmpTable += `<tr><td class="lead">${r.name}</td>${r.cells.map(v=>`<td style="${v===r.best&&r.best>0?'background:#FFF1B8;font-weight:800':''}">${v}</td>`).join('')}</tr>`;
+  });
+  cmpTable += `</tbody></table>`;
+
+  const groupTitleP = g => (g.g===1?'1학년':g.g===2?'2학년':'3학년') + (g.s===0?'':` ${g.s}학기`);
+  const schoolBlocks = picked.map(s=>{
+    const ranked = TRACKS.map(t=>({t,sc:scoreSchool(s,t).score})).sort((a,b)=>b.sc-a.sc).slice(0,4);
+    const rows = s.groups.map(g=>`<tr><th>${groupTitleP(g)} · ${g.pick}</th><td>${g.subj.join(' / ')}</td></tr>`).join('');
+    return `<div class="print-school">
+      <h2>${s.name}등학교 <span style="font-weight:400;font-size:.78rem;color:#555">· ${REGION[s.region].label} · ${s.type}</span></h2>
+      <div class="ps-tags">유리한 계열: ${ranked.map((x,i)=>`${i+1}.${x.t.name}(${x.sc})`).join('  ')}</div>
+      <div class="ps-note">${s.note.replace(/<\/?b>/g,'')}</div>
+      ${s.caution?`<div class="ps-note">⚠ ${s.caution}</div>`:''}
+      <table class="print-grid"><tbody>${rows}</tbody></table>
+    </div>`;
+  }).join('');
+
+  $('#printArea').innerHTML = `
+    <div class="print-meta">
+      <div><h1>고입 상담 학교 비교표</h1><div class="pm-sub">2026학년도 입학생 교육과정 편제표 기준</div></div>
+      <div class="pm-sub">출력일: ${today}<br>대상교: ${picked.map(s=>s.name).join(' · ')}</div>
+    </div>
+    <h2 style="font-family:'Noto Serif KR',serif;font-size:1.05rem;margin:6px 0 8px">계열별 교육과정 적합도 비교 <span style="font-weight:400;font-size:.76rem;color:#666">(핵심과목 2점·연관과목 1점 + 특성화 가산, 음영=최고점)</span></h2>
+    ${cmpTable}
+    <h2 style="font-family:'Noto Serif KR',serif;font-size:1.05rem;margin:14px 0 8px">학교별 상세</h2>
+    ${schoolBlocks}
+    <div class="print-foot">made by 저동고 황부장 · 황부장 고입상담시스템</div>`;
+  window.print();
+}
+
+/* ───────────────── 학교 데이터 입력·업데이트 ───────────────── */
+const dm = {
+  Modal: document.getElementById('dataModal'),
+  School: document.getElementById('dmSchool')
+};
+
+function openDataModal(){ fillSchoolSelect(); loadSchoolToForm($('#dmSchool').value); dm.Modal.hidden=false; }
+function closeDataModal(){ dm.Modal.hidden=true; setMsg(''); }
+function setMsg(t,cls){ const m=$('#dmMsg'); m.textContent=t; m.className='dm-note'+(cls?' '+cls:''); }
+
+function fillSchoolSelect(keep){
+  const sel = $('#dmSchool');
+  sel.innerHTML = SCHOOLS.map(s=>`<option value="${s.id}">${s.name}등학교 (${REGION[s.region].label})</option>`).join('');
+  if(keep) sel.value = keep;
+}
+function groupsToText(groups){
+  return groups.map(g=>`${g.g},${g.s},${g.pick},${g.subj.join('/')}`).join('\n');
+}
+function textToGroups(txt){
+  const out=[];
+  txt.split('\n').map(l=>l.trim()).filter(Boolean).forEach(line=>{
+    const parts = line.split(',');
+    if(parts.length<4) throw new Error('형식 오류: "'+line+'" — 학년,학기,택N,과목/과목 형태여야 합니다.');
+    const g=parseInt(parts[0],10), s=parseInt(parts[1],10), pick=parts[2].trim();
+    const subj=parts.slice(3).join(',').split('/').map(x=>x.trim()).filter(Boolean);
+    if(!(g>=1&&g<=3)) throw new Error('학년은 1~3이어야 합니다: "'+line+'"');
+    if(!(s>=0&&s<=2)) throw new Error('학기는 0·1·2여야 합니다: "'+line+'"');
+    if(!subj.length) throw new Error('과목이 비어 있습니다: "'+line+'"');
+    out.push({g,s,pick,subj});
+  });
+  if(!out.length) throw new Error('선택군이 하나도 없습니다.');
+  return out;
+}
+function loadSchoolToForm(id){
+  const s = SCHOOLS.find(x=>x.id===id); if(!s) return;
+  dm.School.dataset.editing = id;
+  $('#dmName').value=s.name; $('#dmRegion').value=s.region; $('#dmType').value=s.type;
+  $('#dmSlogan').value=s.slogan; $('#dmNote').value=s.note; $('#dmTags').value=(s.tags||[]).join(', ');
+  $('#dmCaution').value=s.caution||''; $('#dmGroups').value=groupsToText(s.groups);
+  setMsg('');
+}
+function blankForm(){
+  dm.School.dataset.editing='';
+  $('#dmName').value=''; $('#dmType').value='일반'; $('#dmSlogan').value='';
+  $('#dmNote').value=''; $('#dmTags').value=''; $('#dmCaution').value=''; $('#dmGroups').value='';
+  setMsg('새 학교 정보를 입력한 뒤 [이 세션에 적용]을 누르세요.','ok');
+}
+function applyForm(){
+  const name=$('#dmName').value.trim();
+  if(!name){ setMsg('학교 이름을 입력하세요.','err'); return; }
+  let groups;
+  try{ groups=textToGroups($('#dmGroups').value); }
+  catch(e){ setMsg(e.message,'err'); return; }
+  const editing = dm.School.dataset.editing;
+  const tags=$('#dmTags').value.split(',').map(x=>x.trim()).filter(Boolean);
+  const caution=$('#dmCaution').value.trim();
+  const data={ name, region:$('#dmRegion').value, type:$('#dmType').value.trim()||'일반',
+    slogan:$('#dmSlogan').value.trim(), note:$('#dmNote').value.trim(), tags,
+    caution:caution||undefined, groups };
+  if(editing){
+    const s=SCHOOLS.find(x=>x.id===editing); Object.assign(s,data); if(!caution) delete s.caution;
+    setMsg(`"${name}등학교" 정보가 업데이트되었습니다.`,'ok');
+  } else {
+    let id='new_'+Date.now().toString(36);
+    data.id=id; SCHOOLS.push(data);
+    state.school=id; fillSchoolSelect(id); dm.School.dataset.editing=id;
+    setMsg(`"${name}등학교"가 새로 추가되었습니다.`,'ok');
+  }
+  refreshTrackCache(); recomputeSubjCount(); renderAll();
+}
+function deleteSchool(){
+  const editing=dm.School.dataset.editing;
+  if(!editing){ setMsg('아직 저장되지 않은 새 학교입니다.','err'); return; }
+  const s=SCHOOLS.find(x=>x.id===editing);
+  if(!confirm(`"${s.name}등학교"를 목록에서 삭제할까요? (이 세션에서만 적용됩니다)`)) return;
+  const i=SCHOOLS.indexOf(s); SCHOOLS.splice(i,1);
+  state.picks=state.picks.filter(p=>p!==editing);
+  if(state.school===editing) state.school=SCHOOLS[0]?.id;
+  refreshTrackCache(); recomputeSubjCount(); fillSchoolSelect();
+  if(SCHOOLS.length){ loadSchoolToForm($('#dmSchool').value); } else blankForm();
+  renderAll(); setMsg(`"${s.name}등학교"를 삭제했습니다.`,'ok');
+}
+function downloadData(){
+  const clean=SCHOOLS.map(s=>({id:s.id,name:s.name,region:s.region,type:s.type,slogan:s.slogan,note:s.note,tags:s.tags,caution:s.caution,groups:s.groups}));
+  const blob=new Blob([JSON.stringify(clean,null,2)],{type:'application/json'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
+  a.download='황부장_학교데이터_'+new Date().toISOString().slice(0,10)+'.json';
+  a.click(); URL.revokeObjectURL(a.href);
+  setMsg('현재 전체 학교 데이터를 JSON 파일로 내려받았습니다.','ok');
+}
+function uploadData(file){
+  const rd=new FileReader();
+  rd.onload=()=>{
+    try{
+      const arr=JSON.parse(rd.result);
+      if(!Array.isArray(arr)||!arr.length) throw new Error('학교 배열 형식이 아닙니다.');
+      arr.forEach((s,i)=>{ if(!s.name||!Array.isArray(s.groups)) throw new Error(`${i+1}번째 항목에 name 또는 groups가 없습니다.`); if(!s.id) s.id='imp_'+i+'_'+Date.now().toString(36); });
+      SCHOOLS.length=0; arr.forEach(s=>SCHOOLS.push(s));
+      state.picks=[]; state.school=SCHOOLS[0].id;
+      refreshTrackCache(); recomputeSubjCount(); fillSchoolSelect(); loadSchoolToForm($('#dmSchool').value); renderAll();
+      setMsg(`불러오기 완료: 총 ${SCHOOLS.length}개교로 교체되었습니다.`,'ok');
+    }catch(e){ setMsg('불러오기 실패: '+e.message,'err'); }
+  };
+  rd.readAsText(file);
+}
+
+$('#btnDataEditor').addEventListener('click',openDataModal);
+$('#dmClose').addEventListener('click',closeDataModal);
+dm.Modal.addEventListener('click',e=>{ if(e.target===dm.Modal) closeDataModal(); });
+document.addEventListener('keydown',e=>{ if(e.key==='Escape'&&!dm.Modal.hidden) closeDataModal(); });
+$('#dmSchool').addEventListener('change',e=>loadSchoolToForm(e.target.value));
+$('#dmNew').addEventListener('click',blankForm);
+$('#dmApply').addEventListener('click',applyForm);
+$('#dmDelete').addEventListener('click',deleteSchool);
+$('#dmDownload').addEventListener('click',downloadData);
+$('#dmUpload').addEventListener('click',()=>$('#dmFile').click());
+$('#dmFile').addEventListener('change',e=>{ if(e.target.files[0]) uploadData(e.target.files[0]); e.target.value=''; });
+
+/* 연관 권장(soft) 스타일 추가 */
+document.head.insertAdjacentHTML('beforeend','<style>.subj.rec.soft{background:linear-gradient(104deg,transparent 2%,#FFF3C4 6%,#FFF3C4 94%,transparent 98%);color:#8A6F1E;font-weight:600;border-color:#F2E3AC;box-shadow:none}</style>');
+
+
+/* ───────────────── ☁️ 클라우드 온라인 연동 로직 ───────────────── */
+const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyxe2u2YOYbclnNnXd_7B7mvDYk9yNta0s4wcCwNGSEKTKTpplWZYIVdw2BdFEwpX-l/exec";
+
+// 1. 최초 화면 그리기 (내장된 기본 데이터로 먼저 빠르게 화면을 보여줌)
+renderAll();
+
+// 2. 클라우드에서 최신 데이터 몰래 불러오기 (성공 시 화면 부드럽게 갱신)
+fetch(GAS_WEB_APP_URL)
+  .then(res => {
+    if(!res.ok) throw new Error("서버 응답 오류");
+    return res.json();
+  })
+  .then(data => {
+    if(data && data.length > 0) {
+      SCHOOLS.length = 0; // 기존 데이터 비우기
+      data.forEach(s => SCHOOLS.push(s)); // 구글 스프레드시트 최신 데이터로 채우기
+      refreshTrackCache(); recomputeSubjCount(); fillSchoolSelect();
+      if(!dm.Modal.hidden) loadSchoolToForm($('#dmSchool').value);
+      renderAll();
+      console.log("☁️ 클라우드 데이터 연동 완료!");
+    }
+  })
+  .catch(err => {
+    console.error("클라우드 데이터를 불러오지 못했습니다. 내장 기본 데이터를 계속 사용합니다.", err);
+  });
+
+// 3. 클라우드 저장 버튼 이벤트 (관리자 전용)
+$('#dmSaveCloud').addEventListener('click', () => {
+  // 폼의 입력값을 먼저 로컬(화면)에 적용시켜 데이터 객체를 만듦
+  applyForm();
+  
+  const editingId = dm.School.dataset.editing || state.school;
+  const updatedSchool = SCHOOLS.find(x => x.id === editingId);
+  if(!updatedSchool) return;
+
+  // 관리자 비밀번호 확인
+  const adminPwd = prompt("클라우드 서버에 영구 반영하려면 관리자 비밀번호를 입력하세요:");
+  if(!adminPwd) return;
+
+  const btn = $('#dmSaveCloud');
+  const originalText = btn.textContent;
+  btn.textContent = "☁️ 저장 중...";
+  btn.disabled = true;
+
+  // 서버로 데이터 전송
+  fetch(GAS_WEB_APP_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain' },
+    body: JSON.stringify({
+      password: adminPwd,
+      data: updatedSchool
+    })
+  })
+  .then(res => res.json())
+  .then(result => {
+    btn.textContent = originalText;
+    btn.disabled = false;
+    if(result.success) {
+      alert("✅ 스프레드시트에 성공적으로 저장되었습니다!");
+    } else {
+      alert("❌ 저장 실패: " + result.message);
+    }
+  })
+  .catch(err => {
+    console.error(err);
+    btn.textContent = originalText;
+    btn.disabled = false;
+    alert("❌ 서버 통신 중 에러가 발생했습니다.");
+  });
+});
+
+</script>
 </body>
 </html>
