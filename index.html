@@ -297,13 +297,18 @@ body{
     <div class="side-note">학교 이름을 누르면 정보가 열립니다. <b style="color:#FFE07A">담기 ＋</b>로 최대 3개교를 골라 비교·인쇄할 수 있습니다.</div>
     <div class="compare-tray" id="compareTray"></div>
     <nav id="schoolNav" aria-label="학교 선택"></nav>
-    <div class="side-tools">
+    
+    <div class="side-tools" id="adminTools" style="display:none;">
       <button class="tool-btn" id="btnDataEditor">⚙ 학교 데이터 입력·업데이트</button>
     </div>
+    
     <div class="sidebar-footer">
       자료: 2026학년도 입학생 교육과정 편제표, 학교별 일반안내, 진로계열별 권장 선택과목 (2025~2026 기준)<br>
       ※ 교육과정은 학교 사정에 따라 변경될 수 있습니다.
-      <div class="made-by">made by 저동고 황부장</div>
+      <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-top:12px;">
+        <div class="made-by" style="margin-top:0;">made by 저동고 황부장</div>
+        <button id="btnAdminLogin" style="background:none; border:none; color:#7E91AE; cursor:pointer; font-size:12px; font-weight:700;">🔒 관리자</button>
+      </div>
     </div>
   </aside>
 
@@ -744,7 +749,7 @@ function rareSubjects(school){
 }
 
 /* ───────────────── 상태 ───────────────── */
-const state = { school: SCHOOLS[0].id, tab: 1, track: null, cmpTrack: 'eng', picks: [] };
+const state = { school: SCHOOLS[0].id, tab: 1, track: null, cmpTrack: 'eng', picks: [], adminPassword: "" };
 const $ = sel => document.querySelector(sel);
 const cur = () => SCHOOLS.find(s=>s.id===state.school);
 function refreshTrackCache(){ TRACKS.forEach(t=>{ t.coreN = new Set(t.core.map(norm)); t.plusN = new Set(t.plus.map(norm)); }); }
@@ -975,7 +980,7 @@ function printComparison(){
   window.print();
 }
 
-/* ───────────────── 학교 데이터 입력·업데이트 ───────────────── */
+/* ───────────────── 학교 데이터 입력·업데이트 (모달) ───────────────── */
 const dm = {
   Modal: document.getElementById('dataModal'),
   School: document.getElementById('dmSchool')
@@ -1097,13 +1102,13 @@ $('#dmFile').addEventListener('change',e=>{ if(e.target.files[0]) uploadData(e.t
 document.head.insertAdjacentHTML('beforeend','<style>.subj.rec.soft{background:linear-gradient(104deg,transparent 2%,#FFF3C4 6%,#FFF3C4 94%,transparent 98%);color:#8A6F1E;font-weight:600;border-color:#F2E3AC;box-shadow:none}</style>');
 
 
-/* ───────────────── ☁️ 클라우드 온라인 연동 로직 ───────────────── */
+/* ───────────────── ☁️ 클라우드 온라인 연동 & 🔒 관리자 로직 ───────────────── */
 const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyxe2u2YOYbclnNnXd_7B7mvDYk9yNta0s4wcCwNGSEKTKTpplWZYIVdw2BdFEwpX-l/exec";
 
-// 1. 최초 화면 그리기 (내장된 기본 데이터로 먼저 빠르게 화면을 보여줌)
+// 1. 최초 화면 그리기 (내장된 기본 데이터)
 renderAll();
 
-// 2. 클라우드에서 최신 데이터 몰래 불러오기 (성공 시 화면 부드럽게 갱신)
+// 2. 클라우드에서 최신 데이터 몰래 불러오기 (비동기)
 fetch(GAS_WEB_APP_URL)
   .then(res => {
     if(!res.ok) throw new Error("서버 응답 오류");
@@ -1111,42 +1116,57 @@ fetch(GAS_WEB_APP_URL)
   })
   .then(data => {
     if(data && data.length > 0) {
-      SCHOOLS.length = 0; // 기존 데이터 비우기
-      data.forEach(s => SCHOOLS.push(s)); // 구글 스프레드시트 최신 데이터로 채우기
+      SCHOOLS.length = 0; 
+      data.forEach(s => SCHOOLS.push(s));
       refreshTrackCache(); recomputeSubjCount(); fillSchoolSelect();
       if(!dm.Modal.hidden) loadSchoolToForm($('#dmSchool').value);
       renderAll();
-      console.log("☁️ 클라우드 데이터 연동 완료!");
+      console.log("☁️ 최신 클라우드 데이터 적용 완료");
     }
   })
   .catch(err => {
-    console.error("클라우드 데이터를 불러오지 못했습니다. 내장 기본 데이터를 계속 사용합니다.", err);
+    console.error("클라우드 통신 실패. 내장 데이터를 계속 사용합니다.", err);
   });
 
-// 3. 클라우드 저장 버튼 이벤트 (관리자 전용)
-$('#dmSaveCloud').addEventListener('click', () => {
-  // 폼의 입력값을 먼저 로컬(화면)에 적용시켜 데이터 객체를 만듦
-  applyForm();
+// 3. 관리자 비밀 로그인 기능
+$('#btnAdminLogin').addEventListener('click', () => {
+  if (state.adminPassword) {
+    alert("이미 관리자로 활성화되어 있습니다.");
+    return;
+  }
+  const pwd = prompt("관리자 모드에 접속하려면 비밀번호를 입력하세요:");
+  if (!pwd) return;
   
+  // 비밀번호를 입력하면 숨겨진 도구 패널을 엽니다.
+  state.adminPassword = pwd;
+  $('#adminTools').style.display = 'block';
+  $('#btnAdminLogin').textContent = '🔓 관리자 (활성)';
+  $('#btnAdminLogin').style.color = '#FFE07A';
+  alert("관리자 기능이 잠금 해제되었습니다. 좌측의 [⚙ 학교 데이터 입력·업데이트] 버튼을 사용할 수 있습니다.");
+});
+
+// 4. 클라우드 저장 로직
+$('#dmSaveCloud').addEventListener('click', () => {
+  applyForm(); // 폼 데이터를 객체에 우선 반영
   const editingId = dm.School.dataset.editing || state.school;
   const updatedSchool = SCHOOLS.find(x => x.id === editingId);
+  
   if(!updatedSchool) return;
-
-  // 관리자 비밀번호 확인
-  const adminPwd = prompt("클라우드 서버에 영구 반영하려면 관리자 비밀번호를 입력하세요:");
-  if(!adminPwd) return;
+  if(!state.adminPassword) {
+    alert("관리자 권한이 없습니다. 로그인을 먼저 해주세요.");
+    return;
+  }
 
   const btn = $('#dmSaveCloud');
   const originalText = btn.textContent;
   btn.textContent = "☁️ 저장 중...";
   btn.disabled = true;
 
-  // 서버로 데이터 전송
   fetch(GAS_WEB_APP_URL, {
     method: 'POST',
     headers: { 'Content-Type': 'text/plain' },
     body: JSON.stringify({
-      password: adminPwd,
+      password: state.adminPassword,
       data: updatedSchool
     })
   })
@@ -1158,6 +1178,13 @@ $('#dmSaveCloud').addEventListener('click', () => {
       alert("✅ 스프레드시트에 성공적으로 저장되었습니다!");
     } else {
       alert("❌ 저장 실패: " + result.message);
+      // 비밀번호가 틀린 경우 관리자 모드 강제 종료
+      if(result.message.includes("비밀번호")) {
+         state.adminPassword = "";
+         $('#adminTools').style.display = 'none';
+         $('#btnAdminLogin').textContent = '🔒 관리자';
+         $('#btnAdminLogin').style.color = '#7E91AE';
+      }
     }
   })
   .catch(err => {
